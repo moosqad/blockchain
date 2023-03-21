@@ -1,5 +1,5 @@
 build: blockchain.cpp
-	g++ -std=gnu++17 -lsqlite3 blockchain.cpp && ./a.out
+	g++ -std=gnu++17 -lsqlite3 -lssl -lcrypto -lssl blockchain.cpp && ./a.out
 
 clean:
 	rm -rf HELLO

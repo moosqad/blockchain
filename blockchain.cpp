@@ -1,9 +1,13 @@
 #include <openssl/err.h>
 #include <openssl/evp.h>
 #include <openssl/pem.h>
+#include <openssl/rsa.h>
 #include <sqlite3.h>
 
+#include <bitset>
+#include <cstddef>
 #include <filesystem>
+#include <fstream>
 #include <iostream>
 #include <map>
 #include <string>
@@ -15,36 +19,71 @@ namespace fs = std::filesystem;
 using namespace fs;
 
 typedef struct {
-  sqlite3* db;
-  uint64_t index;
+  sqlite3*
+      db;  // то где хранится блокчейн, вместо хранения в оперативной памяти
+  uint64_t index;  // для получения баланса, до конкретного блока (обращение к
+  // конкретному состоянию блокчейна)
 } BlockChain;
 
+// typedef struct {
+//   vector<uint8_t> RandBytes;
+//   vector<uint8_t> PrevBlock;
+//   string Sender;
+//   string Receiver;
+//   uint64_t Value;  // количество переданных средств
+//   uint64_t ToStorage;  // налог хранилища блокчейна за проведенную транзакцию
+//   vector<uint8_t> CurrHash;
+//   uint8_t Signature[];
+// } Transaction;
+
+// typedef struct {  // блокчейн это усовершенствованная версия односвязного
+// списка
+//   vector<uint8_t> CurrHash;  // текущий хеш
+//   vector<uint8_t> PrevHash;  // предыдущий хеш
+//   uint64_t Nonce;
+//   uint8_t Difficulty;
+//   string Miner;               // адрес создателя блока
+//   vector<uint8_t> Signature;  // подпис блока
+//   string TimeStamp;           // время создания блока
+//   vector<Transaction> Transactions;
+//   map<string, uint64_t>
+//       Mapping;  // состояния каждого из пользователей, участников блока
+// } Block;
+
 typedef struct {
-  uint8_t RandBytes;
-  uint8_t PrevBlock;
+  vector<uint8_t> RandBytes;
+  vector<uint8_t> PrevBlock;
   string Sender;
   string Receiver;
-  uint64_t Value;
-  uint64_t ToStorage;
+  uint64_t Value;  // количество переданных средств
+  uint64_t ToStorage;  // налог хранилища блокчейна за проведенную транзакцию
   vector<uint8_t> CurrHash;
   uint8_t Signature[];
 } Transaction;
 
-typedef struct {
-  vector<uint8_t> CurrHash;
-  vector<uint8_t> PrevHash;
+struct Block {
   uint64_t Nonce;
   uint8_t Difficulty;
-  string Miner;
-  vector<uint8_t> Signature;
-  string TimeStamp;
-  vector<Transaction> Transactions;
-  map<string, uint64_t> Mapping;
-} Block;
+  char CurrHash[1000];  // текущий хеш
+  char PrevHash[1000];  // предыдущий хеш
+  std::vector<Transaction> Transactions;
+  std::map<std::string, uint64_t> Mapping;
+  std::string Miner;
+  std::string Signature;
+  std::string Timestamp;
+};
 
-// typedef struct {} USER
+// struct BlockChain {
+//   sqlite3* db;
+// };
 
-const char* CREATE_TABLE =
+typedef struct {
+  std::unique_ptr<RSA> PrivateKey;
+} User;
+
+// len(base64(sha256(data))) = 44
+
+const string CREATE_TABLE =
     "CREATE TABLE BlockChain(Id INTEGER PRIMARY KEY AUTOINCREMENT, Hash "
     "VARCHAR(44) UNIQUE, Block TEXT);";
 // #define CREATE_TABLE                                                    \
@@ -69,40 +108,39 @@ const char* CREATE_TABLE =
 // }
 
 static int callback(void* NotUsed, int argc, char** argv, char** azColName) {
-  int i;
-  for (i = 0; i < argc; i++) {
-    printf("%s = %s\n", azColName[i], argv[i] ? argv[i] : "NULL");
-  }
-  printf("\n");
   return 0;
 }
 
-void* NewChain(const string filename, string receiver) {
-  int err = 0;
-  if (!fs::create_directories(filename)) {
-    cout << "CREATING FOLDER ERROR\n";
-    return NULL;
-  }
-  sqlite3* db = 0;
-  const char* file = filename.c_str();
-  if (!sqlite3_open("test.db", &db)) {
-    cout << "CREATING DB ERROR";
+int NewChain(string filename, string receiver) {
+  std::ofstream file(filename);
+  file.close();
+  sqlite3* db;
+  int rc = sqlite3_open(filename.c_str(), &db);
+  if (rc != SQLITE_OK) {
+    std::cerr << "Failed to open database: " << sqlite3_errmsg(db) << std::endl;
     sqlite3_close(db);
-    // return NULL;
+    return 1;
   }
-  char* errMSG;
-
-  if (sqlite3_exec(db, CREATE_TABLE, callback, 0, &errMSG) != SQLITE_OK) {
-    fprintf(stderr, "SQL error: %s\n", errMSG);
-    sqlite3_free(errMSG);
-  } else {
-    fprintf(stdout, "Table created successfully\n");
+  char* error;
+  rc = sqlite3_exec(db, CREATE_TABLE.c_str(), callback, 0, &error);
+  if (rc != SQLITE_OK) {
+    std::cerr << "Failed to create table: " << error << std::endl;
+    sqlite3_free(error);
+    sqlite3_close(db);
+    return 1;
   }
+  BlockChain chain = {.db = db};
+  Block genesis = {
+      .PrevHash = GENESIS_BLOCK,
+      .Mapping = {{STORAGE_CHAIN, STORAGE_VALUE}, {receiver, GENESIS_REWARD}},
+      .Miner = receiver,
+      .Timestamp = std::to_string(std::time(nullptr))};
+  chain.AddBlock(genesis);
   sqlite3_close(db);
-  return NULL;
+  return 0;
 }
 
 int main() {
-  NewChain("HELLO", "H");
+  NewChain("chain.db", "receiver");
   return 0;
 }
