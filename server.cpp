@@ -17,7 +17,16 @@ void handleConnection(tcp::socket socket, Blockchain& blockchain) {
     char data[1024];
 
     // Read the incoming data from the socket
-    size_t len = socket.read_some(boost::asio::buffer(data, 1024));
+    boost::system::error_code error;
+    size_t len = socket.read_some(boost::asio::buffer(data, 1024), error);
+
+    // Check for errors and make sure the socket is still open
+    if (error == boost::asio::error::eof) {
+      std::cout << "Socket closed by client." << std::endl;
+      return;
+    } else if (error) {
+      throw boost::system::system_error(error);
+    }
 
     // Parse the incoming data to get the transaction details
     std::string txString(data, len);
