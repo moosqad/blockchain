@@ -1,11 +1,13 @@
-#include <iostream>
 #include <boost/asio.hpp>
+#include <iostream>
 #include <thread>
 #include <vector>
+
 #include "blockchain.cpp"
 
 using boost::asio::ip::tcp;
-
+// Define a vector to hold all connected clients
+std::vector<tcp::socket> connectedClients;
 // Define a function to handle incoming client connections
 void handleConnection(tcp::socket socket, Blockchain& blockchain) {
   try {
@@ -26,7 +28,8 @@ void handleConnection(tcp::socket socket, Blockchain& blockchain) {
 
     // Add the transaction to the blockchain
     Transaction tx(sender, receiver, amount);
-    Block newBlock(blockchain.chain.size(), {tx}, blockchain.getLastBlock().hash);
+    Block newBlock(blockchain.chain.size(), {tx},
+                   blockchain.getLastBlock().hash);
     blockchain.addBlock(newBlock);
 
     // Send the updated blockchain to all connected clients
@@ -41,9 +44,6 @@ void handleConnection(tcp::socket socket, Blockchain& blockchain) {
     std::cerr << "Exception in thread: " << e.what() << std::endl;
   }
 }
-
-// Define a vector to hold all connected clients
-std::vector<tcp::socket> connectedClients;
 
 int main() {
   try {
@@ -65,7 +65,8 @@ int main() {
       connectedClients.push_back(std::move(socket));
 
       // Start a new thread to handle the incoming connection
-      std::thread(handleConnection, std::move(socket), std::ref(blockchain)).detach();
+      std::thread(handleConnection, std::move(socket), std::ref(blockchain))
+          .detach();
     }
   } catch (std::exception& e) {
     std::cerr << "Exception: " << e.what() << std::endl;
@@ -73,4 +74,3 @@ int main() {
 
   return 0;
 }
-
