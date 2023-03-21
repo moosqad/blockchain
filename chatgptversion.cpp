@@ -1,121 +1,193 @@
-#include <openssl/err.h>
-#include <openssl/evp.h>
-#include <openssl/pem.h>
-#include <openssl/rand.h>
-#include <openssl/rsa.h>
 #include <openssl/sha.h>
-#include <sqlite3.h>
 
-#include <algorithm>
-#include <chrono>
-#include <cstring>
-#include <fstream>
+#include <ctime>
+#include <iomanip>
 #include <iostream>
-#include <map>
-#include <random>
 #include <sstream>
 #include <string>
 #include <vector>
 
 using namespace std;
 
-#define CREATE_TABLE \
-  "CREATE TABLE BlockChain ( \
-	Id INTEGER PRIMARY KEY AUTOINCREMENT, \
-	Hash VARCHAR(44) UNIQUE, \
-	Block TEXT \
-);"
+// Function to calculate the SHA-256 hash of a string
+string sha256(string str) {
+  unsigned char hash[SHA256_DIGEST_LENGTH];
+  SHA256_CTX sha256;
+  SHA256_Init(&sha256);
+  SHA256_Update(&sha256, str.c_str(), str.size());
+  SHA256_Final(hash, &sha256);
 
-#define KEY_SIZE 512
-#define DEBUG true
-#define TXS_LIMIT 2
-#define DIFFICULTY 20
-#define RAND_BYTES 32
-#define STORAGE_REWARD 1
-#define START_PERCENT 10
-
-#define GENESIS_BLOCK "GENESIS-BLOCK"
-#define STORAGE_VALUE 100
-#define GENESIS_REWARD 100
-#define STORAGE_CHAIN "STORAGE-CHAIN"
-
-struct User {
-  RSA* privateKey;
-};
-
-struct Transaction {
-  vector<unsigned char> randBytes;
-  vector<unsigned char> prevBlock;
-  string sender;
-  string receiver;
-  uint64_t value;
-  uint64_t toStorage;
-  vector<unsigned char> currHash;
-  vector<unsigned char> signature;
-};
-
-struct Block {
-  vector<unsigned char> currHash;
-  vector<unsigned char> prevHash;
-  uint64_t nonce;
-  uint8_t difficulty;
-  string miner;
-  vector<unsigned char> signature;
-  string timeStamp;
-  vector<Transaction> transactions;
-  map<string, uint64_t> mapping;
-};
-
-class BlockChain {
- public:
-  BlockChain() : index(0) {
-    int rc = sqlite3_open("blockchain.db", &db);
-    if (rc != SQLITE_OK) {
-      cerr << "Error opening database: " << sqlite3_errmsg(db) << endl;
-      sqlite3_close(db);
-      exit(1);
-    }
-    char* errMsg = nullptr;
-    rc = sqlite3_exec(db, CREATE_TABLE, NULL, NULL, &errMsg);
-    if (rc != SQLITE_OK) {
-      cerr << "Error creating table: " << errMsg << endl;
-      sqlite3_free(errMsg);
-      sqlite3_close(db);
-      exit(1);
-    }
-    sqlite3_free(errMsg);
+  stringstream ss;
+  for (int i = 0; i < SHA256_DIGEST_LENGTH; i++) {
+    ss << hex << setw(2) << setfill('0') << (int)hash[i];
   }
 
-  void addBlock(Block& block) {
-    ostringstream os;
-    json j(block);
-    os << j;
-    string blockStr = os.str();
+  return ss.str();
+}
+// Define a transaction structure
+struct Transaction {
+  string sender;
+  string receiver;
+  float amount;
 
-    vector<unsigned char> hash = sha256(blockStr);
-    string hashStr = base64_encode(hash);
+  Transaction(string s, string r, float a) {
+    sender = s;
+    receiver = r;
+    amount = a;
+  }
+};
 
-    sqlite3_stmt* stmt;
-    int rc = sqlite3_prepare_v2(
-        db, "INSERT INTO BlockChain (Hash, Block) VALUES (?, ?)", -1, &stmt,
-        NULL);
-    if (rc != SQLITE_OK) {
-      cerr << "Error preparing statement: " << sqlite3_errmsg(db) << endl;
-      sqlite3_close(db);
-      exit(1);
+// Define a block structure
+struct Block {
+  int index;
+  time_t timestamp;
+  vector<Transaction> transactions;
+  int nonce;
+  string previousHash;
+  string hash;
+
+  Block(int idx, vector<Transaction> txs, string prevHash) {
+    index = idx;
+    transactions = txs;
+    previousHash = prevHash;
+    nonce = 0;
+    hash = calculateHash();
+    timestamp = time(0);
+  }
+
+  // Function to calculate the hash of the block
+  string calculateHash() const {
+    stringstream ss;
+    ss << index << timestamp << previousHash << nonce;
+    for (Transaction tx : transactions) {
+      ss << tx.sender << tx.receiver << tx.amount;
     }
-    rc = sqlite3_bind_text(stmt, 1, hashStr.c_str(), -1, SQLITE_STATIC);
-    if (rc != SQLITE_OK) {
-      cerr << "Error binding parameter: " << sqlite3_errmsg(db) << endl;
-      sqlite3_finalize(stmt);
-      sqlite3_close(db);
-      exit(1);
+    return sha256(ss.str());
+  }
+
+  // Function to mine the block
+  void mineBlock(int difficulty) {
+    while (hash.substr(0, difficulty) != string(difficulty, '0')) {
+      nonce++;
+      hash = calculateHash();
     }
-    rc = sqlite3_bind_text(stmt, 2, blockStr.c_str(), -1, SQLITE_STATIC);
-    if (rc != SQLITE_OK) {
-      cerr << "Error binding parameter: " << sqlite3_errmsg(db) << endl;
-      sqlite3_finalize(stmt);
-      sqlite3_close(db);
-      exit(1);
+    cout << "Block mined: " << hash << endl;
+  }
+
+  // Function to add a transaction to the block
+  void addTransaction(Transaction tx) { transactions.push_back(tx); }
+  string toString() const {
+    stringstream ss;
+    ss << "Block #" << index << " (timestamp: " << timestamp << "):" << endl;
+    ss << "Previous hash: " << previousHash << endl;
+    ss << "Nonce: " << nonce << endl;
+    ss << "Transactions: " << endl;
+    for (const Transaction& tx : transactions) {
+      ss << "  " << tx.sender << " -> " << tx.receiver << ": " << tx.amount
+         << endl;
     }
-    rc
+    ss << "Hash: " << hash << endl;
+    return ss.str();
+  }
+};
+
+// Define a blockchain structure
+class Blockchain {
+ public:
+  vector<Block> chain;
+  int difficulty;
+
+  Blockchain(int diff) {
+    difficulty = diff;
+    chain.push_back(createGenesisBlock());
+  }
+
+  // Function to create the first block (genesis block)
+  Block createGenesisBlock() {
+    vector<Transaction> txs;
+    Transaction tx = Transaction("0000", "0000", 0);
+    txs.push_back(tx);
+    return Block(0, txs, "0");
+  }
+
+  // Function to get the last block in the chain
+  Block getLastBlock() { return chain.back(); }
+  string toString();
+  bool isValid();
+
+  // Function to add a new block to the chain
+  void addBlock(Block newBlock) {
+    newBlock.previousHash = getLastBlock().hash;
+    newBlock.mineBlock(difficulty);
+    chain.push_back(newBlock);
+  }
+
+  // Function to check if the chain is valid
+  bool isChainValid() {
+    for (int i = 1; i < chain.size(); i++) {
+      Block currentBlock = chain[i];
+      Block previousBlock = chain[i - 1];
+
+      if (currentBlock.hash != currentBlock.calculateHash()) {
+        cout << "Invalid hash for block " << currentBlock.index << endl;
+        return false;
+      }
+
+      if (currentBlock.previousHash != previousBlock.hash) {
+        cout << "Invalid previous hash for block " << currentBlock.index
+             << endl;
+        return false;
+      }
+    }
+    return true;
+  }
+};
+
+// Convert the blockchain to a string representation
+std::string Blockchain::toString() {
+  std::stringstream ss;
+  for (const Block& block : chain) {
+    ss << block.toString() << std::endl;
+  }
+  return ss.str();
+}
+
+// Check if the blockchain is valid
+bool Blockchain::isValid() {
+  for (int i = 1; i < chain.size(); i++) {
+    const Block& currentBlock = chain[i];
+    const Block& previousBlock = chain[i - 1];
+
+    // Check if the current block's hash is valid
+    if (currentBlock.hash != currentBlock.calculateHash()) {
+      return false;
+    }
+
+    // Check if the current block points to the previous block
+    if (currentBlock.previousHash != previousBlock.hash) {
+      return false;
+    }
+  }
+  return true;
+}
+
+int main() {
+  Blockchain blockchain = Blockchain(4);  // set difficulty to 4
+
+  // add some transactions and blocks
+  blockchain.addBlock(Block(1, {Transaction("Alice", "Bob", 10.0)}, ""));
+  blockchain.addBlock(Block(2, {Transaction("Bob", "Charlie", 5.0)}, ""));
+  blockchain.addBlock(Block(3, {Transaction("Charlie", "Alice", 3.0)}, ""));
+
+  // print the blockchain
+  std::cout << "Blockchain:\n" << blockchain.toString() << std::endl;
+
+  // verify the blockchain
+  if (blockchain.isValid()) {
+    std::cout << "Blockchain is valid" << std::endl;
+  } else {
+    std::cout << "Blockchain is NOT valid" << std::endl;
+  }
+
+  return 0;
+}
