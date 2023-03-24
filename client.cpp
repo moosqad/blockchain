@@ -1,3 +1,7 @@
+#include <netinet/in.h>
+#include <netinet/tcp.h>
+#include <sys/socket.h>
+
 #include <boost/asio.hpp>
 #include <boost/asio/ip/tcp.hpp>
 #include <iostream>
@@ -15,18 +19,26 @@ int main(int argc, char* argv[]) {
     std::string sender = argv[1];
     std::string receiver = argv[2];
     float amount = std::stof(argv[3]);
-    // std::cerr << "HERE";
+
     // Create an io_context object
     boost::asio::io_context io_context;
 
     // Create a tcp::resolver object to resolve the server address
     tcp::resolver resolver(io_context);
     tcp::resolver::results_type endpoints =
-        resolver.resolve("localhost", "8080");
+        resolver.resolve("127.0.0.1", "8080");
 
     // Create a tcp::socket object and connect to the server
     tcp::socket socket(io_context);
     boost::asio::connect(socket, endpoints);
+
+    // Set the SO_REUSEADDR option on the socket
+    int yes = 1;
+    if (setsockopt(socket.native_handle(), SOL_SOCKET, SO_REUSEADDR, &yes,
+                   sizeof(int)) == -1) {
+      perror("setsockopt");
+      exit(1);
+    }
 
     // Form the transaction message and send it to the server
     std::string message =
@@ -41,8 +53,7 @@ int main(int argc, char* argv[]) {
     std::string response_data =
         boost::asio::buffer_cast<const char*>(response.data());
     std::cout << response_data << std::endl;
-    // while (true) {
-    // }
+
     return 0;
   } catch (std::exception& e) {
     std::cerr << "Exception: " << e.what() << std::endl;

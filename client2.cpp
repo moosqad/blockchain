@@ -28,7 +28,7 @@ int main(int argc, char* argv[]) {
 
   sockaddr_in serverAddress;
   serverAddress.sin_family = AF_INET;
-  serverAddress.sin_addr.s_addr = inet_addr("127.0.0.1");
+  // serverAddress.sin_addr.s_addr = inet_addr("127.0.0.1");
   serverAddress.sin_port = htons(8080);
 
   if (connect(clientSocket, (sockaddr*)&serverAddress, sizeof(serverAddress)) ==

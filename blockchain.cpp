@@ -9,6 +9,10 @@
 
 using namespace std;
 
+// конкретная область для благотворительности
+// структура, что-то через блокчейн, что такое блокчейн, (на примере утечки
+// денег) обосновать что сделал и зачем
+
 // Function to calculate the SHA-256 hash of a string
 string sha256(string str) {
   unsigned char hash[SHA256_DIGEST_LENGTH];

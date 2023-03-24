@@ -23,17 +23,16 @@ void handleConnection(tcp::socket socket, Blockchain& blockchain) {
     // Read the incoming data from the socket
     boost::system::error_code error;
     size_t len = 0;
-    do {
+    while (true) {
       len = socket.read_some(boost::asio::buffer(data, 1024), error);
       txString += std::string(data, len);
-    } while (error == boost::asio::error::would_block || len == 1024);
 
-    // Check for errors and make sure the socket is still open
-    if (error == boost::asio::error::eof) {
-      std::cout << "Socket closed by client." << std::endl;
-      return;
-    } else if (error) {
-      throw boost::system::system_error(error);
+      if (error == boost::asio::error::eof || !socket.is_open()) {
+        std::cout << "Socket closed by client." << std::endl;
+        break;
+      } else if (error) {
+        throw boost::system::system_error(error);
+      }
     }
 
     // Parse the incoming data to get the transaction details
@@ -70,12 +69,20 @@ void handleConnection(tcp::socket socket, Blockchain& blockchain) {
   } catch (std::exception& e) {
     std::cerr << "Exception in thread: " << e.what() << std::endl;
   }
+  if (socket.is_open()) {
+    try {
+      socket.shutdown(tcp::socket::shutdown_both);
+    } catch (std::exception&) {
+      // Ignore errors when shutting down the socket
+    }
+    socket.close();
+  }
 }
 
 int main() {
   try {
     // Create a blockchain instance
-    Blockchain blockchain = Blockchain(4);
+    Blockchain blockchain = Blockchain(3);
 
     // Create an io_context object
     boost::asio::io_context io_context;

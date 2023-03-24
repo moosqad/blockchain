@@ -1,19 +1,14 @@
 #include <arpa/inet.h>
+#include <netinet/in.h>
 #include <string.h>
 #include <sys/socket.h>
 #include <unistd.h>
 
-#include <iostream>
-#include <thread>
-#include <vector>
-
-
-#include <netinet/in.h>
-#include <arpa/inet.h>
-
 #include <cstring>
 #include <iostream>
 #include <sstream>
+#include <thread>
+#include <vector>
 
 #include "blockchain.cpp"
 
@@ -65,11 +60,11 @@ int main() {
   serverAddress.sin_addr.s_addr = INADDR_ANY;
   serverAddress.sin_port = htons(8080);
 
-  // if (bind(serverSocket, (struct sockaddr*)&serverAddress, sizeof(serverAddress)) == -1) {
+  // if (bind(serverSocket, (struct sockaddr*)&serverAddress,
+  // sizeof(serverAddress)) == -1) {
   //   cerr << "Failed to bind socket." << endl;
   //   return 1;
   // }
-
 
   if (listen(serverSocket, SOMAXCONN) == -1) {
     cerr << "Failed to listen on socket." << endl;
