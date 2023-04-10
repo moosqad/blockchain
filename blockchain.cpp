@@ -58,7 +58,7 @@ struct Block {
     transactions = txs;
     previousHash = prevHash;
     nonce = 0;
-    hash = calculateHash();
+    hash = calculate_hash();
     timestamp = time(0);
   }
 
@@ -93,7 +93,7 @@ struct Block {
   void mineBlock(int difficulty) {
     while (hash.substr(0, difficulty) != string(difficulty, '0')) {
       nonce++;
-      hash = calculateHash();
+      hash = calculate_hash();
     }
     cout << "Block mined: " << hash << endl;
   }
@@ -117,10 +117,10 @@ struct Block {
 
 // Define a blockchain structure
 class Blockchain {
- private:
-  sqlite3* db;
+  //  private:
 
  public:
+  sqlite3* db;
   vector<Block> chain;
   int difficulty;
 
@@ -161,7 +161,7 @@ class Blockchain {
   // Function to get the last block in the chain
   Block getLastBlock() { return chain.back(); }
   string toString();
-  bool isValid();
+  bool isValid(sqlite3* db);
 
   // Function to add a new block to the chain
   void addBlock(Block newBlock) {
@@ -218,26 +218,6 @@ class Blockchain {
     }
     sqlite3_finalize(stmt);
   }
-
-  // Function to check if the chain is valid
-  bool isChainValid() {
-    for (int i = 1; i < chain.size(); i++) {
-      Block currentBlock = chain[i];
-      Block previousBlock = chain[i - 1];
-
-      if (currentBlock.hash != currentBlock.calculateHash()) {
-        cout << "Invalid hash for block " << currentBlock.index << endl;
-        return false;
-      }
-
-      if (currentBlock.previousHash != previousBlock.hash) {
-        cout << "Invalid previous hash for block " << currentBlock.index
-             << endl;
-        return false;
-      }
-    }
-    return true;
-  }
 };
 
 // Convert the blockchain to a string representation
@@ -249,45 +229,115 @@ std::string Blockchain::toString() {
   return ss.str();
 }
 
-// Check if the blockchain is valid
-bool Blockchain::isValid() {
-  for (int i = 1; i < chain.size(); i++) {
-    const Block& currentBlock = chain[i];
-    const Block& previousBlock = chain[i - 1];
-
-    // Check if the current block's hash is valid
-    if (currentBlock.hash != currentBlock.calculateHash()) {
+bool Blockchain::isValid(sqlite3* db) {
+  // First, we need to construct the actual blockchain from
+  // the stored data
+  Blockchain blockchain(1);  // We assume the difficulty is 1 for simplicity
+  string sql = "SELECT * FROM blocks ORDER BY bl_index";
+  sqlite3_stmt* stmt;
+  int rc = sqlite3_prepare_v2(db, sql.c_str(), -1, &stmt, NULL);
+  if (rc != SQLITE_OK) {
+    cerr << "Error preparing statement: " << sqlite3_errmsg(db) << endl;
+    return false;
+  }
+  while (sqlite3_step(stmt) == SQLITE_ROW) {
+    int index = sqlite3_column_int(stmt, 0);
+    string hash = (const char*)sqlite3_column_text(stmt, 1);
+    string previousHash = (const char*)sqlite3_column_text(stmt, 2);
+    time_t timestamp = sqlite3_column_int(stmt, 3);
+    int nonce = sqlite3_column_int(stmt, 4);
+    vector<Transaction> transactions;
+    string sql_tx = "SELECT * FROM transactions WHERE block_index = ?";
+    sqlite3_stmt* stmt_tx;
+    int rc_tx = sqlite3_prepare_v2(db, sql_tx.c_str(), -1, &stmt_tx, NULL);
+    if (rc_tx != SQLITE_OK) {
+      cerr << "Error preparing statement: " << sqlite3_errmsg(db) << endl;
       return false;
     }
+    sqlite3_bind_int(stmt_tx, 1, index);
+    while (sqlite3_step(stmt_tx) == SQLITE_ROW) {
+      string sender = (const char*)sqlite3_column_text(stmt_tx, 1);
+      string receiver = (const char*)sqlite3_column_text(stmt_tx, 2);
+      float amount = sqlite3_column_double(stmt_tx, 3);
+      string signature = (const char*)sqlite3_column_text(stmt_tx, 4);
+      transactions.push_back(Transaction(sender, receiver, amount, signature));
+    }
+    sqlite3_finalize(stmt_tx);
+    Block block(index, transactions, previousHash);
+    block.timestamp = timestamp;
+    block.nonce = nonce;
+    block.hash = hash;
+    blockchain.chain.push_back(block);
+  }
+  sqlite3_finalize(stmt);
 
-    // Check if the current block points to the previous block
-    if (currentBlock.previousHash != previousBlock.hash) {
+  // Now, we compare the stored blockchain with the constructed blockchain
+  if (blockchain.chain.size() != blockchain.getLastBlock().index + 1) {
+    cerr << "Stored blockchain size is not equal to the actual blockchain size"
+         << endl;
+    return false;
+  }
+  for (int i = 1; i < blockchain.chain.size(); i++) {
+    Block block = blockchain.chain[i];
+    Block previousBlock = blockchain.chain[i - 1];
+    if (block.previousHash != previousBlock.hash && i != 1) {
+      cerr << "Block " << i << " has an invalid previous hash" << endl;
+      return false;
+    }
+    if (block.calculate_hash() != block.hash) {
+      cerr << "Block " << i << " has an invalid hash" << endl;
       return false;
     }
   }
+
   return true;
 }
 
-int main() {
-  Blockchain blockchain = Blockchain(4);  // set difficulty to 4
+Blockchain blockchain = Blockchain(4);  // set difficulty to 4
+                                        // int main() {
+                                        //   // add some transactions and blocks
+                                        //   blockchain.addBlock(
+//       Block(1, {Transaction("Alice", "Bob", 10.0, "Alice's sign")}, ""));
+//   blockchain.addBlock(
+//       Block(2, {Transaction("Bob", "Charlie", 5.0, "Bob's sign")}, ""));
+//   blockchain.addBlock(
+//       Block(3, {Transaction("Charlie", "Alice", 3.0, "Charlie's sign")},
+//       ""));
 
-  // add some transactions and blocks
-  blockchain.addBlock(
-      Block(1, {Transaction("Alice", "Bob", 10.0, "Alice's sign")}, ""));
-  blockchain.addBlock(
-      Block(2, {Transaction("Bob", "Charlie", 5.0, "Bob's sign")}, ""));
-  blockchain.addBlock(
-      Block(3, {Transaction("Charlie", "Alice", 3.0, "Charlie's sign")}, ""));
+//   // print the blockchain
+//   std::cout << "Blockchain:\n" << blockchain.toString() << std::endl;
 
-  // print the blockchain
-  std::cout << "Blockchain:\n" << blockchain.toString() << std::endl;
+//   string op;
 
-  // verify the blockchain
-  if (blockchain.isValid()) {
-    std::cout << "Blockchain is valid" << std::endl;
-  } else {
-    std::cout << "Blockchain is NOT valid" << std::endl;
-  }
+//   while (1) {
+//     cin >> op;
+//     // verify the blockchain
+//     if (op == "check") {
+//       if (blockchain.isValid(blockchain.db)) {
+//         std::cout << "Blockchain is valid" << std::endl;
+//       } else {
+//         std::cout << "Blockchain is NOT valid" << std::endl;
+//       }
+//     }
+//     if (op == "break") {
+//       sqlite3_stmt* stmt;
+//       string sql = "UPDATE blocks SET hash = 'invalid hash' WHERE bl_index =
+//       3"; int rc = sqlite3_prepare_v2(blockchain.db, sql.c_str(), -1, &stmt,
+//       NULL); if (rc != SQLITE_OK) {
+//         cerr << "Error updating block: " << sqlite3_errmsg(blockchain.db)
+//              << endl;
+//         return 0;
+//       }
+//       rc = sqlite3_step(stmt);
+//       if (rc != SQLITE_DONE) {
+//         cerr << "Error updating block: " << sqlite3_errmsg(blockchain.db)
+//              << endl;
+//         return 0;
+//       }
+//       sqlite3_finalize(stmt);
+//     }
+//     if (op == "exit") break;
+//   }
 
-  return 0;
-}
+//   return 0;
+// }
