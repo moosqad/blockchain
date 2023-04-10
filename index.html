@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>Blockchain Demo</title>
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+
+<body>
+  <h1>Blockchain Demo</h1>
+  <form id="tx-form">
+    <label for="sender">Sender:</label>
+    <input type="text" name="sender" id="sender"><br>
+    <label for="receiver">Receiver:</label>
+    <input type="text" name="receiver" id="receiver"><br>
+    <label for="amount">Amount:</label>
+    <input type="number" step="0.01" name="amount" id="amount"><br>
+    <input type="submit" value="Submit">
+  </form>
+  <script>
+    // Add an event listener to the form to send the data to the server
+    $('#tx-form').submit(function (event) {
+      event.preventDefault(); // Prevent the default form submission
+      var form_data = $(this).serialize(); // Get the form data
+      $.ajax({
+        type: 'POST',
+        url: '/tx',
+        data: form_data,
+        success: function (response) {
+          console.log(response); // Log the response from the server
+        },
+        error: function (xhr, status, error) {
+          console.error(error); // Log any errors that occur
+        }
+      });
+    });
+  </script>
+</body>
+
+</html>
