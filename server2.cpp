@@ -1,3 +1,4 @@
+
 #include <boost/asio.hpp>
 #include <boost/beast.hpp>
 #include <boost/beast/websocket.hpp>
@@ -20,8 +21,9 @@ int main(int argc, char* argv[]) {
 
   // Set up the server
   asio::io_context io_context;
-  tcp::acceptor acceptor(io_context, tcp::endpoint(tcp::v4(), 3000));
+  tcp::acceptor acceptor(io_context, tcp::endpoint(tcp::v4(), 8080));
   int index = 1;
+
   // Serve requests
   while (true) {
     // Wait for a new connection
@@ -38,7 +40,7 @@ int main(int argc, char* argv[]) {
     http::response<http::string_body> response;
     try {
       if (request.method() == http::verb::post) {
-        cout << "POST";
+        cout << "POST: ";
         // Parse the transaction data from the JSON request body
         nlohmann::json json_data = nlohmann::json::parse(request.body().data());
         std::string sender = json_data["sender"];
@@ -73,6 +75,7 @@ int main(int argc, char* argv[]) {
         response.set(http::field::content_type, "text/plain");
         response.body() = "Hello, world!";
       } else {
+        cout << "Don't recongize request type" << endl;
         // Send a bad request response
         response.result(http::status::bad_request);
         response.set(http::field::content_type, "text/plain");
