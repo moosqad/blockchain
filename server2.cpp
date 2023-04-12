@@ -1,98 +1,110 @@
-#include <arpa/inet.h>
-#include <netinet/in.h>
-#include <string.h>
-#include <sys/socket.h>
-#include <unistd.h>
-
-#include <cstring>
+#include <boost/asio.hpp>
+#include <boost/beast.hpp>
+#include <boost/beast/websocket.hpp>
 #include <iostream>
-#include <sstream>
-#include <thread>
-#include <vector>
+#include <nlohmann/json.hpp>
+#include <string>
 
 #include "blockchain.cpp"
 
+namespace asio = boost::asio;
+namespace beast = boost::beast;
+namespace http = beast::http;
+namespace websocket = beast::websocket;
+using tcp = asio::ip::tcp;
 using namespace std;
 
-void handleConnection(int clientSocket, Blockchain& blockchain,
-                      vector<int>& connectedClients) {
-  char buffer[1024];
-  int len = read(clientSocket, buffer, 1024);
+int main(int argc, char* argv[]) {
+  // Set up the blockchain
+  Blockchain blockchain(4);
 
-  if (len <= 0) {
-    close(clientSocket);
-    return;
-  }
-
-  // Parse the incoming data to get the transaction details
-  std::istringstream iss(buffer);
-  std::string sender, receiver;
-  float amount;
-  iss >> sender >> receiver >> amount;
-
-  // Add the transaction to the blockchain
-  Transaction tx(sender, receiver, amount);
-  Block newBlock(blockchain.chain.size(), {tx}, blockchain.getLastBlock().hash);
-  blockchain.addBlock(newBlock);
-
-  // Send the updated blockchain to all connected clients
-  std::string chainString = blockchain.toString();
-  for (int client : connectedClients) {
-    if (client == clientSocket) {
-      continue;
-    }
-    write(client, chainString.c_str(), chainString.length());
-  }
-
-  close(clientSocket);
-}
-
-int main() {
-  int serverSocket = socket(AF_INET, SOCK_STREAM, 0);
-  if (serverSocket == -1) {
-    cerr << "Failed to create socket." << endl;
-    return 1;
-  }
-
-  sockaddr_in serverAddress;
-  memset(&serverAddress, 0, sizeof(serverAddress));
-  serverAddress.sin_family = AF_INET;
-  serverAddress.sin_addr.s_addr = INADDR_ANY;
-  serverAddress.sin_port = htons(8080);
-
-  // if (bind(serverSocket, (struct sockaddr*)&serverAddress,
-  // sizeof(serverAddress)) == -1) {
-  //   cerr << "Failed to bind socket." << endl;
-  //   return 1;
-  // }
-
-  if (listen(serverSocket, SOMAXCONN) == -1) {
-    cerr << "Failed to listen on socket." << endl;
-    return 1;
-  }
-
-  Blockchain blockchain = Blockchain(4);
-  vector<int> connectedClients;
-
+  // Set up the server
+  asio::io_context io_context;
+  tcp::acceptor acceptor(io_context, tcp::endpoint(tcp::v4(), 3000));
+  int index = 1;
+  // Serve requests
   while (true) {
-    sockaddr_in clientAddress;
-    socklen_t clientAddressSize = sizeof(clientAddress);
+    // Wait for a new connection
+    tcp::socket socket(io_context);
+    acceptor.accept(socket);
+    std::cout << "Client connected from: " << socket.remote_endpoint()
+              << std::endl;
+    // Read the HTTP request
+    beast::flat_buffer buffer;
+    http::request<http::string_body> request;
+    http::read(socket, buffer, request);
 
-    int clientSocket =
-        accept(serverSocket, (sockaddr*)&clientAddress, &clientAddressSize);
-    if (clientSocket == -1) {
-      cerr << "Failed to accept incoming connection." << endl;
-      continue;
+    // Handle the request
+    http::response<http::string_body> response;
+    try {
+      if (request.method() == http::verb::post) {
+        cout << "POST";
+        // Parse the transaction data from the JSON request body
+        nlohmann::json json_data = nlohmann::json::parse(request.body().data());
+        std::string sender = json_data["sender"];
+        std::string receiver = json_data["receiver"];
+        float amount = json_data["amount"];
+        std::string signature = json_data["signature"];
+
+        // Add the transaction to the blockchain
+        blockchain.addBlock(Block(
+            index, {Transaction(sender, receiver, amount, signature)}, ""));
+        index++;
+
+        // Send a success response
+        response.result(http::status::ok);
+        response.set(http::field::content_type, "text/plain");
+        response.body() = "Transaction added to the blockchain.";
+        http::write(socket, response);  // move this line inside the try block
+      } else if (request.method() == http::verb::get &&
+                 request.target() == "/get_blockchain") {
+        // Get the blockchain data
+        std::string blockchain_data = blockchain.toString();
+
+        // Send the blockchain data as a JSON response
+        response.result(http::status::ok);
+        response.set(http::field::content_type, "application/json");
+        response.body() = blockchain_data;
+        http::write(socket, response);  // move this line inside the try block
+      } else if (request.method() == http::verb::get &&
+                 request.target() == "/get_hello") {
+        // handle get_hello request
+        response.result(http::status::ok);
+        response.set(http::field::content_type, "text/plain");
+        response.body() = "Hello, world!";
+      } else {
+        // Send a bad request response
+        response.result(http::status::bad_request);
+        response.set(http::field::content_type, "text/plain");
+        response.body() = "Invalid request.";
+        http::write(socket, response);  // move this line inside the try block
+      }
+    } catch (const std::exception& ex) {
+      // Send an internal server error response
+      response.result(http::status::internal_server_error);
+      response.set(http::field::content_type, "text/plain");
+      response.body() = "Internal Server Error: " + std::string(ex.what());
+    } catch (const std::exception& ex) {
+      // Send an internal server error response
+      response.result(http::status::internal_server_error);
+      response.set(http::field::content_type, "text/plain");
+      response.body() = "Internal Server Error: " + std::string(ex.what());
     }
 
-    connectedClients.push_back(clientSocket);
+    // Respond to the client with the response message
+    http::write(socket, response);
 
-    std::thread(handleConnection, clientSocket, std::ref(blockchain),
-                std::ref(connectedClients))
-        .detach();
+    // Shutdown the connection
+    beast::error_code ec;
+    socket.shutdown(tcp::socket::shutdown_send, ec);
+    if (ec == beast::errc::not_connected) {
+      // Ignore the error if the socket was already closed
+      ec = {};
+    }
+    if (ec) {
+      throw beast::system_error{ec};
+    }
   }
-
-  close(serverSocket);
 
   return 0;
 }

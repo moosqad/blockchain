@@ -293,10 +293,10 @@ bool Blockchain::isValid(sqlite3* db) {
   return true;
 }
 
-Blockchain blockchain = Blockchain(4);  // set difficulty to 4
-                                        // int main() {
-                                        //   // add some transactions and blocks
-                                        //   blockchain.addBlock(
+// Blockchain blockchain = Blockchain(4);  // set difficulty to 4
+// int main() {
+//   // add some transactions and blocks
+//   blockchain.addBlock(
 //       Block(1, {Transaction("Alice", "Bob", 10.0, "Alice's sign")}, ""));
 //   blockchain.addBlock(
 //       Block(2, {Transaction("Bob", "Charlie", 5.0, "Bob's sign")}, ""));
@@ -306,38 +306,6 @@ Blockchain blockchain = Blockchain(4);  // set difficulty to 4
 
 //   // print the blockchain
 //   std::cout << "Blockchain:\n" << blockchain.toString() << std::endl;
-
-//   string op;
-
-//   while (1) {
-//     cin >> op;
-//     // verify the blockchain
-//     if (op == "check") {
-//       if (blockchain.isValid(blockchain.db)) {
-//         std::cout << "Blockchain is valid" << std::endl;
-//       } else {
-//         std::cout << "Blockchain is NOT valid" << std::endl;
-//       }
-//     }
-//     if (op == "break") {
-//       sqlite3_stmt* stmt;
-//       string sql = "UPDATE blocks SET hash = 'invalid hash' WHERE bl_index =
-//       3"; int rc = sqlite3_prepare_v2(blockchain.db, sql.c_str(), -1, &stmt,
-//       NULL); if (rc != SQLITE_OK) {
-//         cerr << "Error updating block: " << sqlite3_errmsg(blockchain.db)
-//              << endl;
-//         return 0;
-//       }
-//       rc = sqlite3_step(stmt);
-//       if (rc != SQLITE_DONE) {
-//         cerr << "Error updating block: " << sqlite3_errmsg(blockchain.db)
-//              << endl;
-//         return 0;
-//       }
-//       sqlite3_finalize(stmt);
-//     }
-//     if (op == "exit") break;
-//   }
 
 //   return 0;
 // }
