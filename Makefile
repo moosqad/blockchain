@@ -10,4 +10,4 @@ blockchain: blockchain.cpp
 
 clean:
 	rm -rf HELLO client.dSYM server.dSYM validity.dSYM bl.dSYM .vscode
-	rm test.db ./client ./server a.out  blockchain.db ./bl ./validity .DS_Store
+	rm test.db ./client ./server a.out  blockchain.db ./blockchain ./validity .DS_Store

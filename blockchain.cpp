@@ -36,13 +36,11 @@ struct Transaction {
   string sender;
   string receiver;
   float amount;
-  string signature;
 
-  Transaction(string s, string r, float a, string sign) {
+  Transaction(string s, string r, float a) {
     sender = s;
     receiver = r;
     amount = a;
-    signature = sign;
   }
 };
 
@@ -68,7 +66,7 @@ struct Block {
     string data = to_string(index) + previousHash + to_string(timestamp) +
                   to_string(nonce);
     for (auto tx : transactions) {
-      data += tx.sender + tx.receiver + to_string(tx.amount) + tx.signature;
+      data += tx.sender + tx.receiver + to_string(tx.amount);
     }
     unsigned char hash[SHA256_DIGEST_LENGTH];
     SHA256((const unsigned char*)data.c_str(), data.length(), hash);
@@ -144,8 +142,7 @@ class Blockchain {
     }
     sql =
         "CREATE TABLE IF NOT EXISTS transactions (id INTEGER PRIMARY KEY, "
-        "sender TEXT, receiver TEXT, amount REAL, signature "
-        "TEXT, block_index INTEGER)";
+        "sender TEXT, receiver TEXT, amount REAL, block_index INTEGER)";
     rc = sqlite3_exec(db, sql.c_str(), NULL, NULL, &errmsg);
     if (rc != SQLITE_OK) {
       cerr << "Error creating transactions table: " << errmsg << endl;
@@ -155,7 +152,7 @@ class Blockchain {
   // Function to create the first block (genesis block)
   Block createGenesisBlock() {
     vector<Transaction> txs;
-    Transaction tx = Transaction("0000", "0000", 0, "Genesis sign");
+    Transaction tx = Transaction("0000", "0000", 0);
     txs.push_back(tx);
     return Block(0, txs, "0");
   }
@@ -202,7 +199,7 @@ class Blockchain {
   void add_transaction(Transaction tx, int block_index) {
     string sql =
         "INSERT INTO transactions (sender, receiver, amount, "
-        "signature, block_index) VALUES (?, ?, ?, ?, ?)";
+        "block_index) VALUES (?, ?, ?, ?)";
     sqlite3_stmt* stmt;
     int rc = sqlite3_prepare_v2(db, sql.c_str(), -1, &stmt, NULL);
     if (rc != SQLITE_OK) {
@@ -212,8 +209,7 @@ class Blockchain {
     sqlite3_bind_text(stmt, 1, tx.sender.c_str(), -1, SQLITE_TRANSIENT);
     sqlite3_bind_text(stmt, 2, tx.receiver.c_str(), -1, SQLITE_TRANSIENT);
     sqlite3_bind_double(stmt, 3, (double)tx.amount);
-    sqlite3_bind_text(stmt, 4, tx.signature.c_str(), -1, SQLITE_TRANSIENT);
-    sqlite3_bind_int(stmt, 5, block_index);
+    sqlite3_bind_int(stmt, 4, block_index);
     rc = sqlite3_step(stmt);
     if (rc != SQLITE_DONE) {
       cerr << "Error adding transaction: " << sqlite3_errmsg(db) << endl;
@@ -237,7 +233,6 @@ class Blockchain {
         t["sender"] = tx.sender;
         t["receiver"] = tx.receiver;
         t["amount"] = tx.amount;
-        t["signature"] = tx.signature;
         txs.push_back(t);
       }
       b["transactions"] = txs;
@@ -287,8 +282,8 @@ bool Blockchain::isValid(sqlite3* db) {
       string sender = (const char*)sqlite3_column_text(stmt_tx, 1);
       string receiver = (const char*)sqlite3_column_text(stmt_tx, 2);
       float amount = sqlite3_column_double(stmt_tx, 3);
-      string signature = (const char*)sqlite3_column_text(stmt_tx, 4);
-      transactions.push_back(Transaction(sender, receiver, amount, signature));
+
+      transactions.push_back(Transaction(sender, receiver, amount));
     }
     sqlite3_finalize(stmt_tx);
     Block block(index, transactions, previousHash);
@@ -325,16 +320,13 @@ bool Blockchain::isValid(sqlite3* db) {
 // Blockchain blockchain = Blockchain(4);  // set difficulty to 4
 // int main() {
 //   // add some transactions and blocks
-//   blockchain.addBlock(
-//       Block(1, {Transaction("Alice", "Bob", 10.0, "Alice's sign")}, ""));
-//   blockchain.addBlock(
-//       Block(2, {Transaction("Bob", "Charlie", 5.0, "Bob's sign")}, ""));
-//   blockchain.addBlock(
-//       Block(3, {Transaction("Charlie", "Alice", 3.0, "Charlie's sign")},
-//       ""));
+//   blockchain.addBlock(Block(1, {Transaction("Alice", "Bob", 10.0)}, ""));
+//   blockchain.addBlock(Block(2, {Transaction("Bob", "Charlie", 5.0)}, ""));
+//   blockchain.addBlock(Block(3, {Transaction("Charlie", "Alice", 3.0)}, ""));
 
 //   // print the blockchain
-//   std::cout << "Blockchain:\n" << blockchain.toString() << std::endl;
+//   std::cout << "Blockchain:\n"
+//             << blockchain.isValid(blockchain.db) << std::endl;
 
 //   return 0;
 // }

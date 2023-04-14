@@ -7,13 +7,11 @@ $(document).ready(() => {
     const sender = $("#sender-input").val();
     const receiver = $("#receiver-input").val();
     const amount = $("#amount-input").val();
-    const signature = $("#signature-input").val();
 
     const transaction = {
       sender: sender,
       receiver: receiver,
       amount: Number(amount),
-      signature: signature,
     };
 
     $.post(

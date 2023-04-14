@@ -46,11 +46,10 @@ int main() {
         std::string sender = json_data["sender"];
         std::string receiver = json_data["receiver"];
         float amount = json_data["amount"];
-        std::string signature = json_data["signature"];
 
         // Add the transaction to the blockchain
-        blockchain.addBlock(Block(
-            index, {Transaction(sender, receiver, amount, signature)}, ""));
+        blockchain.addBlock(
+            Block(index, {Transaction(sender, receiver, amount)}, ""));
         index++;
 
         // Send a success response
