@@ -75,7 +75,7 @@ struct Block {
     string hash_str = "";
     for (int i = 0; i < SHA256_DIGEST_LENGTH; i++) {
       char hex[3];
-      sprintf(hex, "%02x", hash[i]);
+      snprintf(hex, 3, "%02x", hash[i]);
       hash_str += hex;
     }
     return hash_str;

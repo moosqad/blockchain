@@ -97,11 +97,6 @@ int main(int argc, char* argv[]) {
       response.result(http::status::internal_server_error);
       response.set(http::field::content_type, "text/plain");
       response.body() = "Internal Server Error: " + std::string(ex.what());
-    } catch (const std::exception& ex) {
-      // Send an internal server error response
-      response.result(http::status::internal_server_error);
-      response.set(http::field::content_type, "text/plain");
-      response.body() = "Internal Server Error: " + std::string(ex.what());
     }
 
     // Respond to the client with the response message
