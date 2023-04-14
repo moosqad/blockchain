@@ -1,12 +1,12 @@
-# g++ -std=gnu++17 -lsqlite3 -lcrypto -lboost_system client.cpp -o client -L/usr/local/Cellar/openssl@1.1/1.1.1t/lib -I/usr/local/Cellar/openssl@1.1/1.1.1t/include
-build: blockchain.cpp server2.cpp
-	g++ -std=gnu++17 -lsqlite3 -lcrypto -lboost_system server2.cpp -o server -L/usr/local/Cellar/openssl@1.1/1.1.1t/lib -I/usr/local/Cellar/openssl@1.1/1.1.1t/include
+CPP = g++
+EFLAGS = -Wall -Wextra -Werror -std=gnu++17 -lsqlite3 -lcrypto -lboost_system
+SSL = -L/usr/local/Cellar/openssl@1.1/1.1.1t/lib -I/usr/local/Cellar/openssl@1.1/1.1.1t/include
+
+build: blockchain.cpp server.cpp
+	$(CPP) $(EFLAGS) server.cpp -o server $(SSL)
 
 blockchain: blockchain.cpp
-	g++ -std=gnu++17 -lsqlite3 -lcrypto -lboost_system blockchain.cpp -o bl -L/usr/local/Cellar/openssl@1.1/1.1.1t/lib -I/usr/local/Cellar/openssl@1.1/1.1.1t/include -fsanitize=address -g
-
-validity_check: blockchain.cpp validity_check.cpp
-	g++ -std=gnu++17 -lsqlite3 -lcrypto -lboost_system validity_check.cpp -o validity -L/usr/local/Cellar/openssl@1.1/1.1.1t/lib -I/usr/local/Cellar/openssl@1.1/1.1.1t/include -fsanitize=address -g
+	$(CPP) $(EFLAGS) blockchain.cpp -o blockchain $(SSL)
 
 clean:
 	rm -rf HELLO client.dSYM server.dSYM validity.dSYM bl.dSYM .vscode

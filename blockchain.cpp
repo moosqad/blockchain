@@ -300,12 +300,13 @@ bool Blockchain::isValid(sqlite3* db) {
   sqlite3_finalize(stmt);
 
   // Now, we compare the stored blockchain with the constructed blockchain
-  if (blockchain.chain.size() != blockchain.getLastBlock().index + 1) {
+  if (blockchain.chain.size() !=
+      (unsigned long)blockchain.getLastBlock().index + 1) {
     cerr << "Stored blockchain size is not equal to the actual blockchain size"
          << endl;
     return false;
   }
-  for (int i = 1; i < blockchain.chain.size(); i++) {
+  for (unsigned long i = 1; i < blockchain.chain.size(); i++) {
     Block block = blockchain.chain[i];
     Block previousBlock = blockchain.chain[i - 1];
     if (block.previousHash != previousBlock.hash && i != 1) {

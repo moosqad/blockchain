@@ -15,7 +15,7 @@ namespace websocket = beast::websocket;
 using tcp = asio::ip::tcp;
 using namespace std;
 
-int main(int argc, char* argv[]) {
+int main() {
   // Set up the blockchain
   Blockchain blockchain(4);
 
