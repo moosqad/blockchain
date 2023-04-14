@@ -25,10 +25,24 @@ $(document).ready(() => {
   });
 
   // Handle button click to get the blockchain
-  $("#get-blockchain-button").click(() => {
-    $.get("http://localhost:8080/get_blockchain", (data) => {
-      $("#blockchain-data").text(data);
+  // $("#get-blockchain-button").click(() => {
+  //   $.get("http://localhost:8080/get_blockchain", (data) => {
+  //     $("#blockchain-data").text(data);
+  //   });
+  // });
+
+
+
+  $("#valid-blockchain-button").click(() => {
+    $.get("http://localhost:8080/is_valid", (data) => {
+
+      const responseElement = $("<p>").html(data);
+      $("#blockchain-data").text(responseElement);
     });
+  });
+
+  $("#alert").click(() => {
+    alert("HELLO");
   });
 });
 

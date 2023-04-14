@@ -59,6 +59,17 @@ int main(int argc, char* argv[]) {
         response.body() = "Transaction added to the blockchain.";
         http::write(socket, response);  // move this line inside the try block
       } else if (request.method() == http::verb::get &&
+                 request.target() == "/is_valid") {
+        // Check if the blockchain is valid
+        bool is_valid = blockchain.isValid(blockchain.db);
+
+        // Send the result as a plain text response
+        response.result(http::status::ok);
+        response.set(http::field::content_type, "text/plain");
+        response.body() =
+            is_valid ? "Blockchain is valid" : "ERROR! Blockchain was changed!";
+        http::write(socket, response);
+      } else if (request.method() == http::verb::get &&
                  request.target() == "/get_blockchain") {
         // Get the blockchain data
         std::string blockchain_data = blockchain.toString();
@@ -68,12 +79,6 @@ int main(int argc, char* argv[]) {
         response.set(http::field::content_type, "application/json");
         response.body() = blockchain_data;
         http::write(socket, response);  // move this line inside the try block
-      } else if (request.method() == http::verb::get &&
-                 request.target() == "/get_hello") {
-        // handle get_hello request
-        response.result(http::status::ok);
-        response.set(http::field::content_type, "text/plain");
-        response.body() = "Hello, world!";
       } else {
         cout << "Don't recongize request type" << endl;
         // Send a bad request response

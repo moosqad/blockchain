@@ -26,6 +26,6 @@ button {
 }
 
 #blockchain-data {
-  white-space: pre-wrap;
+  font-weight: 100;
+  color: blue;
 }
-
