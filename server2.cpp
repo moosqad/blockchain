@@ -63,21 +63,26 @@ int main(int argc, char* argv[]) {
         // Check if the blockchain is valid
         bool is_valid = blockchain.isValid(blockchain.db);
 
-        // Send the result as a plain text response
+        // Create a JSON object with the result
+        nlohmann::json json_result = {
+            {"is_valid", is_valid},
+            {"message", is_valid ? "Blockchain is valid"
+                                 : "ERROR! Blockchain was changed!"}};
+
+        // Send the result as a JSON response
         response.result(http::status::ok);
-        response.set(http::field::content_type, "text/plain");
-        response.body() =
-            is_valid ? "Blockchain is valid" : "ERROR! Blockchain was changed!";
+        response.set(http::field::content_type, "application/json");
+        response.body() = json_result.dump();
         http::write(socket, response);
       } else if (request.method() == http::verb::get &&
                  request.target() == "/get_blockchain") {
         // Get the blockchain data
-        std::string blockchain_data = blockchain.toString();
+        json blockchain_data = blockchain.toJSON();
 
         // Send the blockchain data as a JSON response
         response.result(http::status::ok);
         response.set(http::field::content_type, "application/json");
-        response.body() = blockchain_data;
+        response.body() = blockchain_data.dump(2);
         http::write(socket, response);  // move this line inside the try block
       } else {
         cout << "Don't recongize request type" << endl;
@@ -100,7 +105,7 @@ int main(int argc, char* argv[]) {
     }
 
     // Respond to the client with the response message
-    http::write(socket, response);
+    // http::write(socket, response);
 
     // Shutdown the connection
     beast::error_code ec;

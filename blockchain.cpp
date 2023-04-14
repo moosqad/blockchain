@@ -4,11 +4,13 @@
 #include <ctime>
 #include <iomanip>
 #include <iostream>
+#include <nlohmann/json.hpp>
 #include <sstream>
 #include <string>
 #include <vector>
 
 using namespace std;
+using json = nlohmann::json;
 
 // конкретная область для благотворительности
 // структура, что-то через блокчейн, что такое блокчейн, (на примере утечки
@@ -217,6 +219,32 @@ class Blockchain {
       cerr << "Error adding transaction: " << sqlite3_errmsg(db) << endl;
     }
     sqlite3_finalize(stmt);
+  }
+
+  json toJSON() const {
+    json blockchain;
+    for (const Block& block : chain) {
+      json b;
+      b["index"] = block.index;
+      b["timestamp"] = block.timestamp;
+      b["nonce"] = block.nonce;
+      b["previous_hash"] = block.previousHash;
+      b["hash"] = block.hash;
+
+      json txs;
+      for (const Transaction& tx : block.transactions) {
+        json t;
+        t["sender"] = tx.sender;
+        t["receiver"] = tx.receiver;
+        t["amount"] = tx.amount;
+        t["signature"] = tx.signature;
+        txs.push_back(t);
+      }
+      b["transactions"] = txs;
+
+      blockchain.push_back(b);
+    }
+    return blockchain;
   }
 };
 
