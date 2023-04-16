@@ -12,11 +12,8 @@
 using namespace std;
 using json = nlohmann::json;
 
-// конкретная область для благотворительности
-// структура, что-то через блокчейн, что такое блокчейн, (на примере утечки
-// денег) обосновать что сделал и зачем
 
-// Function to calculate the SHA-256 hash of a string
+// Функция вычисляющая SHA-256 хеш строки
 string sha256(string str) {
   unsigned char hash[SHA256_DIGEST_LENGTH];
   SHA256_CTX sha256;
@@ -31,7 +28,7 @@ string sha256(string str) {
 
   return ss.str();
 }
-// Define a transaction structure
+// Структура транзакции блокчейна
 struct Transaction {
   string sender;
   string receiver;
@@ -44,7 +41,7 @@ struct Transaction {
   }
 };
 
-// Define a block structure
+// Структура блока в блокчейне
 struct Block {
   int index;
   time_t timestamp;
@@ -79,7 +76,7 @@ struct Block {
     return hash_str;
   }
 
-  // Function to calculate the hash of the block
+  // функция вычисления хеша блока
   string calculateHash() const {
     stringstream ss;
     ss << index << timestamp << previousHash << nonce;
@@ -89,7 +86,7 @@ struct Block {
     return sha256(ss.str());
   }
 
-  // Function to mine the block
+  // функция майнинга блока
   void mineBlock(int difficulty) {
     while (hash.substr(0, difficulty) != string(difficulty, '0')) {
       nonce++;
@@ -98,7 +95,7 @@ struct Block {
     cout << "Block mined: " << hash << endl;
   }
 
-  // Function to add a transaction to the block
+  // Добавление транзакции в блокчейн, хранящийся в оперативной памяти
   void addTransaction(Transaction tx) { transactions.push_back(tx); }
   string toString() const {
     stringstream ss;
@@ -115,7 +112,7 @@ struct Block {
   }
 };
 
-// Define a blockchain structure
+// Структура блокчейна
 class Blockchain {
   //  private:
 
@@ -149,7 +146,7 @@ class Blockchain {
     }
   }
 
-  // Function to create the first block (genesis block)
+  // Функция создания первого (genesis) блока
   Block createGenesisBlock() {
     vector<Transaction> txs;
     Transaction tx = Transaction("0000", "0000", 0);
@@ -162,7 +159,7 @@ class Blockchain {
   string toString();
   bool isValid(sqlite3* db);
 
-  // Function to add a new block to the chain
+  // функция добавляющая блок в цепочку блокчейна
   void addBlock(Block newBlock) {
     newBlock.previousHash = getLastBlock().hash;
     newBlock.mineBlock(difficulty);
@@ -243,7 +240,7 @@ class Blockchain {
   }
 };
 
-// Convert the blockchain to a string representation
+// перевод цепи блокчейна в строковое представление
 std::string Blockchain::toString() {
   std::stringstream ss;
   for (const Block& block : chain) {
@@ -251,11 +248,9 @@ std::string Blockchain::toString() {
   }
   return ss.str();
 }
-
+// функция проверки блокчейна на валидность
 bool Blockchain::isValid(sqlite3* db) {
-  // First, we need to construct the actual blockchain from
-  // the stored data
-  Blockchain blockchain(1);  // We assume the difficulty is 1 for simplicity
+  Blockchain blockchain(1);
   string sql = "SELECT * FROM blocks ORDER BY bl_index";
   sqlite3_stmt* stmt;
   int rc = sqlite3_prepare_v2(db, sql.c_str(), -1, &stmt, NULL);
@@ -294,7 +289,8 @@ bool Blockchain::isValid(sqlite3* db) {
   }
   sqlite3_finalize(stmt);
 
-  // Now, we compare the stored blockchain with the constructed blockchain
+  // теперь сравниваем блокчейн который хранится у нас и тот который мы создали
+  // внутри функции
   if (blockchain.chain.size() !=
       (unsigned long)blockchain.getLastBlock().index + 1) {
     cerr << "Stored blockchain size is not equal to the actual blockchain size"

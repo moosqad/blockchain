@@ -7,6 +7,7 @@
 #include <string>
 
 #include "blockchain.cpp"
+#include "registration.cpp"
 
 namespace asio = boost::asio;
 namespace beast = boost::beast;
@@ -16,92 +17,133 @@ using tcp = asio::ip::tcp;
 using namespace std;
 
 int main() {
-  // Set up the blockchain
   Blockchain blockchain(4);
+  Users adm("admin", "admin");
+  adm.add_user();
 
   // Set up the server
   asio::io_context io_context;
   tcp::acceptor acceptor(io_context, tcp::endpoint(tcp::v4(), 8080));
   int index = 1;
 
-  // Serve requests
+  // Ожидание соединения
   while (true) {
-    // Wait for a new connection
+    // Ждем нового подключения
     tcp::socket socket(io_context);
     acceptor.accept(socket);
     std::cout << "Client connected from: " << socket.remote_endpoint()
               << std::endl;
-    // Read the HTTP request
+    // Читаем HTTP запрос
     beast::flat_buffer buffer;
     http::request<http::string_body> request;
     http::read(socket, buffer, request);
 
-    // Handle the request
+    // Обработка HTTP запроса
     http::response<http::string_body> response;
     try {
-      if (request.method() == http::verb::post) {
+      if (request.method() == http::verb::post &&
+          request.target() == "/add_transaction") {
         cout << "POST: ";
-        // Parse the transaction data from the JSON request body
+        // Парсинг данных запроса в JSON формат
         nlohmann::json json_data = nlohmann::json::parse(request.body().data());
         std::string sender = json_data["sender"];
         std::string receiver = json_data["receiver"];
         float amount = json_data["amount"];
 
-        // Add the transaction to the blockchain
+        // Добавляем транзакцию в блокчейн
         blockchain.addBlock(
             Block(index, {Transaction(sender, receiver, amount)}, ""));
         index++;
 
-        // Send a success response
+        // Отправляем ответ
         response.result(http::status::ok);
         response.set(http::field::content_type, "text/plain");
         response.body() = "Transaction added to the blockchain.";
-        http::write(socket, response);  // move this line inside the try block
+        http::write(socket, response);
+      } else if (request.method() == http::verb::post &&
+                 request.target() == "/add_user") {
+        cout << "POST: ";
+
+        nlohmann::json json_data = nlohmann::json::parse(request.body().data());
+        std::string username = json_data["username"];
+        std::string password = json_data["password"];
+        Users new_user(username, password);
+
+        bool is_exist = !new_user.user_exists();
+
+        nlohmann::json json_result = {
+            {"response", is_exist},
+            {"message", is_exist ? "Вы успешно зарегестрировались"
+                                 : "Пользователь с таким именем уже "
+                                   "существует. Попробуйте другое"}};
+
+        if (is_exist) {
+          new_user.add_user();
+        }
+
+        response.result(http::status::ok);
+        response.set(http::field::content_type, "application/json");
+        response.body() = json_result.dump();
+        http::write(socket, response);
+      } else if (request.method() == http::verb::post &&
+                 request.target() == "/sign_in") {
+        cout << "POST: ";
+
+        nlohmann::json json_data = nlohmann::json::parse(request.body().data());
+        std::string nickname = json_data["username"];
+        std::string password = json_data["password"];
+        Users new_user(nickname, password);
+
+        bool is_exist = new_user.is_valid_username_password();
+
+        nlohmann::json json_result = {
+            {"response", is_exist},
+        };
+
+        response.result(http::status::ok);
+        response.set(http::field::content_type, "application/json");
+        response.body() = json_result.dump();
+        http::write(socket, response);
       } else if (request.method() == http::verb::get &&
                  request.target() == "/is_valid") {
-        // Check if the blockchain is valid
         bool is_valid = blockchain.isValid(blockchain.db);
-
-        // Create a JSON object with the result
         nlohmann::json json_result = {
             {"is_valid", is_valid},
-            {"message", is_valid ? "Blockchain is valid"
-                                 : "ERROR! Blockchain was changed!"}};
+            {"message",
+             is_valid
+                 ? "Цепочка блокчейна не подвергалась "
+                   "изменениям извне. Блокчейну можно доверять"
+                 : "ВНИМАНИЕ! Цепь блокчейна подверглась изменениям со стороны "
+                   "администраторов фонда. Не совершайте транзакции!"}};
 
-        // Send the result as a JSON response
         response.result(http::status::ok);
         response.set(http::field::content_type, "application/json");
         response.body() = json_result.dump();
         http::write(socket, response);
       } else if (request.method() == http::verb::get &&
                  request.target() == "/get_blockchain") {
-        // Get the blockchain data
         json blockchain_data = blockchain.toJSON();
 
-        // Send the blockchain data as a JSON response
         response.result(http::status::ok);
         response.set(http::field::content_type, "application/json");
         response.body() = blockchain_data.dump(2);
-        http::write(socket, response);  // move this line inside the try block
+        http::write(socket, response);
       } else {
         cout << "Don't recongize request type" << endl;
-        // Send a bad request response
+        // Отправляем ошибку
         response.result(http::status::bad_request);
         response.set(http::field::content_type, "text/plain");
         response.body() = "Invalid request.";
-        http::write(socket, response);  // move this line inside the try block
+        http::write(socket, response);
       }
     } catch (const std::exception& ex) {
-      // Send an internal server error response
+      //Отправляем внутреннюю ошибку сервера
       response.result(http::status::internal_server_error);
       response.set(http::field::content_type, "text/plain");
       response.body() = "Internal Server Error: " + std::string(ex.what());
     }
 
-    // Respond to the client with the response message
-    // http::write(socket, response);
-
-    // Shutdown the connection
+    // закрываем соединение
     beast::error_code ec;
     socket.shutdown(tcp::socket::shutdown_send, ec);
     if (ec == beast::errc::not_connected) {

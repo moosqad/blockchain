@@ -1,5 +1,14 @@
 $(document).ready(() => {
-  console.log("ready!");
+  const cookies = document.cookie.split(';');
+  const usernameCookie = cookies.find(cookie => cookie.trim().startsWith('username='));
+  const username = usernameCookie ? usernameCookie.split('=')[1] : null;
+  // Set cookie with expiration time of 1 day
+  const expirationTime = new Date();
+  expirationTime.setDate(expirationTime.getDate() + 1);
+  document.cookie = `expires=${expirationTime.toUTCString()};`;
+
+
+  console.log("username:", username);
 
   $("#add-transaction-form").submit((event) => {
     event.preventDefault();
@@ -14,16 +23,59 @@ $(document).ready(() => {
       amount: Number(amount),
     };
 
+
     $.post(
-      "http://localhost:8080",
+      "http://localhost:8080/add_transaction",
       JSON.stringify(transaction),
       () => {
         alert("Transaction added to the blockchain.");
       }
     );
+
   });
 
-  function printBlockchain(blockchain) {
+  $("#sign-up").click(() => {
+    const username = $("#username").val();
+    const password = $("#password").val();
+
+    const new_user = {
+      username: username,
+      password: password,
+    };
+
+    $.post(
+      "http://localhost:8080/add_user",
+      JSON.stringify(new_user),
+      (data) => {
+        console.log(data);
+      }
+    );
+  });
+
+  $("#sign-in").click(() => {
+    const username = $("#username").val();
+    const password = $("#password").val();
+
+    const new_user = {
+      username: username,
+      password: password,
+    };
+
+    $.post(
+      "http://localhost:8080/sign_in",
+      JSON.stringify(new_user),
+      (data) => {
+        console.log(data);
+        if (data.response == true) {
+          document.cookie = `username=${username}`;
+
+          window.location.href = "transactions.html";
+        }
+      }
+    );
+  });
+
+  function displayBlockchain(blockchain) {
     for (let block of blockchain) {
       console.log(`Block ${block.index}:`);
       console.log(`Hash: ${block.hash}`);
@@ -101,7 +153,7 @@ $(document).ready(() => {
       dataType: "json",
       success: function (response) {
         printBlockchain(response);
-        displayBlockchain(response);
+        // displayBlockchain(response);
 
       },
       error: function (jqXHR, textStatus, errorThrown) {
