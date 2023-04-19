@@ -18,12 +18,14 @@ using namespace std;
 
 int main() {
   Blockchain blockchain(4);
-  Users adm("admin", "admin");
+  Users adm("", "", "", "", "", "admin", "admin");
   adm.add_user();
 
   // Set up the server
   asio::io_context io_context;
-  tcp::acceptor acceptor(io_context, tcp::endpoint(tcp::v4(), 8080));
+  tcp::acceptor acceptor(
+      io_context, tcp::endpoint(asio::ip::make_address("0.0.0.0"), 8080));
+
   int index = 1;
 
   // Ожидание соединения
@@ -67,15 +69,22 @@ int main() {
         nlohmann::json json_data = nlohmann::json::parse(request.body().data());
         std::string username = json_data["username"];
         std::string password = json_data["password"];
-        Users new_user(username, password);
+        std::string first_name = json_data["first_name"];
+        std::string second_name = json_data["second_name"];
+        std::string third_name = json_data["third_name"];
+        std::string phone = json_data["phone"];
+        std::string email = json_data["email"];
+
+        Users new_user(first_name, second_name, third_name, phone, email,
+                       username, password);
 
         bool is_exist = !new_user.user_exists();
 
         nlohmann::json json_result = {
             {"response", is_exist},
             {"message", is_exist ? "Вы успешно зарегестрировались"
-                                 : "Пользователь с таким именем уже "
-                                   "существует. Попробуйте другое"}};
+                                 : "Пользователь с таким никнеймом уже "
+                                   "существует. Попробуйте другой"}};
 
         if (is_exist) {
           new_user.add_user();
@@ -92,7 +101,7 @@ int main() {
         nlohmann::json json_data = nlohmann::json::parse(request.body().data());
         std::string nickname = json_data["username"];
         std::string password = json_data["password"];
-        Users new_user(nickname, password);
+        Users new_user("", "", "", "", "", nickname, password);
 
         bool is_exist = new_user.is_valid_username_password();
 
@@ -137,7 +146,7 @@ int main() {
         http::write(socket, response);
       }
     } catch (const std::exception& ex) {
-      //Отправляем внутреннюю ошибку сервера
+      // Отправляем внутреннюю ошибку сервера
       response.result(http::status::internal_server_error);
       response.set(http::field::content_type, "text/plain");
       response.body() = "Internal Server Error: " + std::string(ex.what());

@@ -12,7 +12,6 @@
 using namespace std;
 using json = nlohmann::json;
 
-
 // Функция вычисляющая SHA-256 хеш строки
 string sha256(string str) {
   unsigned char hash[SHA256_DIGEST_LENGTH];

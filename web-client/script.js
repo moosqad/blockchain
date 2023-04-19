@@ -37,10 +37,20 @@ $(document).ready(() => {
   $("#sign-up").click(() => {
     const username = $("#username").val();
     const password = $("#password").val();
+    const first_name = $("#first_name").val();
+    const second_name = $("#second_name").val();
+    const third_name = $("#third_name").val();
+    const phone = $("#phone").val();
+    const email = $("#email").val();
 
     const new_user = {
       username: username,
       password: password,
+      first_name: first_name,
+      second_name: second_name,
+      third_name: third_name,
+      phone: phone,
+      email: email,
     };
 
     $.post(
