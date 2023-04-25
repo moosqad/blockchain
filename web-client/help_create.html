@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <title>Create Help Record</title>
+  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+
+  <style>
+    body {
+      background-color: #f2f2f2;
+    }
+
+    form {
+      width: 80%;
+      margin: auto;
+      background-color: white;
+      padding: 20px;
+      border-radius: 5px;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+    }
+
+    label {
+      display: block;
+      margin-bottom: 5px;
+    }
+
+    input[type="text"],
+    input[type="number"] {
+      width: 100%;
+      padding: 10px;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+      margin-bottom: 20px;
+      box-sizing: border-box;
+    }
+
+    input[type="submit"] {
+      background-color: #4CAF50;
+      color: white;
+      padding: 12px 20px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      float: right;
+    }
+
+    input[type="submit"]:hover {
+      background-color: #45a049;
+    }
+
+    h2 {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+  </style>
+</head>
+
+<body>
+  <h2>Create Help Record</h2>
+  <form id="createHelpForm">
+    <label for="firstName">First Name:</label>
+    <input type="text" id="firstName" name="firstName" required>
+
+    <label for="secondName">Second Name:</label>
+    <input type="text" id="secondName" name="secondName" required>
+
+    <label for="thirdName">Third Name:</label>
+    <input type="text" id="thirdName" name="thirdName" required>
+
+    <label for="problem">Problem:</label>
+    <input type="text" id="problem" name="problem" required>
+
+    <label for="moneyGoal">Money Goal:</label>
+    <input type="number" id="moneyGoal" name="moneyGoal" required>
+
+    <label for="filialId">Filial ID:</label>
+    <input type="number" id="filialId" name="filialId" required>
+
+    <input type="submit" value="Create">
+  </form>
+  <script src="create.js"></script>
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.24.0/axios.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+
+</body>
+
+</html>

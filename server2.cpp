@@ -24,7 +24,8 @@ int main() {
   Filial filial(db);
   Worker worker(db);
   Help help(db);
-  help.createHelp("sdfs", "", "", "", 12, 1);
+  help.createHelp("Иванов", "Иван", "Иванович", "Пропал", 12, 1);
+  help.createHelp("ФАмилия", "Имя", "Отчество", "Сирота", 3254353, 2);
   Volunteer volunteer(db);
   Contractor contractor(db);
   Contract contract(db);
@@ -51,20 +52,80 @@ int main() {
     // Обработка HTTP запроса
     http::response<http::string_body> response;
     try {
-      if (request.method() == http::verb::post &&
-          request.target() == "/add_transaction") {
-        cout << "POST: ";
-        // Парсинг данных запроса в JSON формат
-
-      } else if (request.method() == http::verb::get &&
-                 request.target() == "/read") {
+      if (request.method() == http::verb::get && request.target() == "/read") {
         string data = help.readHelp();
 
         response.result(http::status::ok);
         response.set(http::field::content_type, "application/json");
         response.body() = data;
         http::write(socket, response);
-      } else {
+      } else if (request.method() == http::verb::post &&
+                 request.target() == "/update") {
+        cout << "POST: UPDATE:";
+        // Парсинг данных запроса в JSON формат
+        nlohmann::json req_body = nlohmann::json::parse(request.body());
+
+        // Получаем параметры для обновления помощи
+        int id = req_body["id"];
+        std::string first_name = req_body["first_name"];
+        std::string second_name = req_body["second_name"];
+        std::string third_name = req_body["third_name"];
+        std::string problem = req_body["problem"];
+        int money_goal = req_body["money_goal"];
+        int filial_id = req_body["filial_id"];
+
+        // Обновляем информацию о помощи в базе данных
+        help.updateById(id, first_name, second_name, third_name, problem,
+                        money_goal, filial_id);
+
+        // Возвращаем ответ клиенту
+        response.result(http::status::ok);
+        response.set(http::field::content_type, "text/json");
+        response.body() = "Help information updated successfully.";
+        http::write(socket, response);
+      } else if (request.method() == http::verb::post &&
+                 request.target() == "/create") {
+        cout << "POST: CREATE:";
+        // Парсинг данных запроса в JSON формат
+        nlohmann::json req_body = nlohmann::json::parse(request.body());
+
+        // Получаем параметры для обновления помощи
+        std::string first_name = req_body["first_name"];
+        std::string second_name = req_body["second_name"];
+        std::string third_name = req_body["third_name"];
+        std::string problem = req_body["problem"];
+        int money_goal = req_body["money_goal"];
+        int filial_id = req_body["filial_id"];
+
+        // Обновляем информацию о помощи в базе данных
+        help.createHelp(first_name, second_name, third_name, problem,
+                        money_goal, filial_id);
+
+        // Возвращаем ответ клиенту
+        response.result(http::status::ok);
+        response.set(http::field::content_type, "text/json");
+        response.body() = "Help information created successfully.";
+        http::write(socket, response);
+      } else if (request.method() == http::verb::post &&
+                 request.target() == "/delete") {
+        cout << "POST: DELETE:";
+        // Парсинг данных запроса в JSON формат
+        nlohmann::json req_body = nlohmann::json::parse(request.body());
+
+        // Получаем параметры для обновления помощи
+        int id = req_body["id"];
+
+        // Обновляем информацию о помощи в базе данных
+        help.deleteHelp(id);
+
+        // Возвращаем ответ клиенту
+        response.result(http::status::ok);
+        response.set(http::field::content_type, "text/json");
+        response.body() = "Help information deleted successfully.";
+        http::write(socket, response);
+      }
+
+      else {
         cout << "Don't recongize request type" << endl;
         // Отправляем ошибку
         response.result(http::status::bad_request);

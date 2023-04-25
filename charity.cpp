@@ -230,6 +230,28 @@ class Help {
     return result == SQLITE_DONE;
   }
 
+  void deleteHelp(int helpId) {
+    const std::string sql = "DELETE FROM help WHERE id = ?;";
+    sqlite3_stmt* stmt;
+    if (sqlite3_prepare_v2(m_db, sql.c_str(), -1, &stmt, nullptr) !=
+        SQLITE_OK) {
+      std::cerr << "Error preparing delete help statement: "
+                << sqlite3_errmsg(m_db) << std::endl;
+      return;
+    }
+
+    sqlite3_bind_int(stmt, 1, helpId);
+
+    if (sqlite3_step(stmt) != SQLITE_DONE) {
+      std::cerr << "Error executing delete help statement: "
+                << sqlite3_errmsg(m_db) << std::endl;
+      sqlite3_finalize(stmt);
+      return;
+    }
+
+    sqlite3_finalize(stmt);
+  }
+
  private:
   sqlite3* m_db;
 };

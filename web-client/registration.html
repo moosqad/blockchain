@@ -2,57 +2,53 @@
 <html lang="en">
 
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Регистрация</title>
-  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+  <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
-  <h1>Регистрация</h1>
-  <form id="add-user-form">
-    <label for="sender-input">Никнейм:</label>
-    <input type="text" id="username" required />
-    <br />
-    <label for="receiver-input">Пароль:</label>
-
-    <input type="text" id="password" required />
-
-    <br />
-    <label for="f_name">Имя:</label>
-
-    <input type="text" id="first_name" required />
-
-    <br />
-    <label for="receiver-input">Фамилия:</label>
-
-    <input type="text" id="second_name" required />
-
-    <br />
-    <label for="receiver-input">Отчество:</label>
-
-    <input type="text" id="third_name" required />
-
-    <br />
-    <label for="receiver-input">Номер телефона:</label>
-
-    <input type="text" id="phone" required />
-
-    <br />
-    <label for="receiver-input">Электронная почта:</label>
-
-    <input type="text" id="email" required />
-
-
-
-    <br />
-  </form>
-
+  <div class="container my-5">
+    <h1 class="text-center mb-4">Регистрация</h1>
+    <form id="add-user-form">
+      <div class="form-group">
+        <label for="username">Никнейм:</label>
+        <input type="text" id="username" class="form-control" required>
+      </div>
+      <div class="form-group">
+        <label for="password">Пароль:</label>
+        <input type="password" id="password" class="form-control" required>
+      </div>
+      <div class="form-group">
+        <label for="first_name">Имя:</label>
+        <input type="text" id="first_name" class="form-control" required>
+      </div>
+      <div class="form-group">
+        <label for="second_name">Фамилия:</label>
+        <input type="text" id="second_name" class="form-control" required>
+      </div>
+      <div class="form-group">
+        <label for="third_name">Отчество:</label>
+        <input type="text" id="third_name" class="form-control" required>
+      </div>
+      <div class="form-group">
+        <label for="phone">Номер телефона:</label>
+        <input type="tel" id="phone" class="form-control" required>
+      </div>
+      <div class="form-group">
+        <label for="email">Электронная почта:</label>
+        <input type="email" id="email" class="form-control" required>
+      </div>
+      <div class="d-flex justify-content-center">
+        <button id="sign-in" class="btn btn-secondary mr-3">Войти</button>
+        <button id="sign-up" class="btn btn-primary">Зарегистрироваться</button>
+      </div>
+    </form>
+  </div>
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
   <script src="script.js"></script>
-  <button id="sign-in">Войти</button>
-  <button id="sign-up">Зарегестрироваться</button>
-
 </body>
 
 </html>

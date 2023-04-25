@@ -4,31 +4,85 @@
 <head>
   <meta charset="UTF-8">
   <title>Help Data</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
 </head>
 
 <body>
-  <table id="helpTable">
-    <thead>
-      <tr>
-        <th>ID</th>
-        <th>First Name</th>
-        <th>Second Name</th>
-        <th>Third Name</th>
-        <th>Problem</th>
-        <th>Money Goal</th>
-        <th>Filial ID</th>
-      </tr>
-    </thead>
-    <tbody>
-    </tbody>
-  </table>
+  <div class="container mt-5">
+    <h1 class="text-center mb-4">Данные об участниках фонда</h1>
+    <a href="help_create.html">
+      <button id="createButton" style="background-color: green; color: white; padding: 10px 20px; border: none;">Создать
+        запись</button>
+    </a>
 
+    <div class="table-responsive">
+      <table id="helpTable" class="table table-bordered table-striped">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Имя</th>
+            <th>Фамилия</th>
+            <th>Отчество</th>
+            <th>Проблема</th>
+            <th>Цель сбора(руб.)</th>
+            <th>Filial ID</th>
+
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+
+    <div id="updateForm" class="mt-4" style="display: none;">
+      <h2>Отредактировать запись</h2>
+      <form>
+        <div class="form-group">
+          <label for="id">ID:</label>
+          <input type="text" id="id" name="id" class="form-control">
+        </div>
+
+        <div class="form-group">
+          <label for="firstName">Имя:</label>
+          <input type="text" id="firstName" name="firstName" class="form-control">
+        </div>
+
+        <div class="form-group">
+          <label for="secondName">Фамилия:</label>
+          <input type="text" id="secondName" name="secondName" class="form-control">
+        </div>
+
+        <div class="form-group">
+          <label for="thirdName">Отчество:</label>
+          <input type="text" id="thirdName" name="thirdName" class="form-control">
+        </div>
+
+        <div class="form-group">
+          <label for="problem">Описание проблемы:</label>
+          <input type="text" id="problem" name="problem" class="form-control">
+        </div>
+
+        <div class="form-group">
+          <label for="moneyGoal">Цель сбора(руб.):</label>
+          <input type="number" id="moneyGoal" name="moneyGoal" class="form-control">
+        </div>
+
+        <div class="form-group">
+          <label for="filialId">Filial ID:</label>
+          <input type="number" id="filialId" name="filialId" class="form-control">
+        </div>
+
+        <button type="submit" class="btn btn-primary">Подтвердить</button>
+      </form>
+    </div>
+  </div>
+
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.24.0/axios.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
   <script src="crudHelp.js"></script>
   <script src="script.js"></script>
-  <!-- <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script> -->
-
-
 </body>
 
 </html>
