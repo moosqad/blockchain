@@ -1,4 +1,10 @@
 body {
+  /*фон в виде градиента из нескольких цветов*/
+  position: relative;
+  padding-bottom: 3.25%;
+  height: 100%;
+
+  margin: 50;
   font-family: Arial, sans-serif;
 }
 
@@ -54,4 +60,38 @@ button {
   border-color: #80bdff;
   outline: 0;
   box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+}
+
+.card-text {
+  font-size: 10;
+}
+
+#blockchain-table {
+  width: 90%;
+}
+
+.separator-bottom {
+  border-bottom: 1px solid #ddd;
+}
+
+.separator-right {
+  border-right: 1px solid #ddd;
+}
+
+#blockchain-data {
+  font-size: 30px;
+  font-family: bold;
+  color: white;
+  position: center;
+  margin-left: 2vw;
+  width: 100%;
+}
+
+#validity {
+  width: 100%;
+}
+
+#status {
+  font-family: bold;
+  font-size: 30px;
 }

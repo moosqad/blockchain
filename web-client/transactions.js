@@ -8,101 +8,6 @@ $(document).ready(() => {
   document.cookie = `expires=${expirationTime.toUTCString()};`;
 
 
-  console.log("username:", username);
-
-  $("#add-transaction-form").submit((event) => {
-    event.preventDefault();
-
-    const sender = $("#sender-input").val();
-    const receiver = $("#receiver-input").val();
-    const amount = $("#amount-input").val();
-
-    const transaction = {
-      sender: sender,
-      receiver: receiver,
-      amount: Number(amount),
-    };
-
-
-    $.post(
-      "http://localhost:8080/add_transaction",
-      JSON.stringify(transaction),
-      () => {
-        alert("Transaction added to the blockchain.");
-      }
-    );
-
-  });
-
-  $("#sign-up").click(() => {
-    const username = $("#username").val();
-    const password = $("#password").val();
-    const first_name = $("#first_name").val();
-    const second_name = $("#second_name").val();
-    const third_name = $("#third_name").val();
-    const phone = $("#phone").val();
-    const email = $("#email").val();
-
-    const new_user = {
-      username: username,
-      password: password,
-      first_name: first_name,
-      second_name: second_name,
-      third_name: third_name,
-      phone: phone,
-      email: email,
-    };
-
-    $.post(
-      "http://localhost:8000/add_user",
-      JSON.stringify(new_user),
-      (data) => {
-        console.log(data);
-      }
-    );
-  });
-
-  $("#sign-in").click(() => {
-    const username = $("#username").val();
-    const password = $("#password").val();
-
-    const new_user = {
-      username: username,
-      password: password,
-    };
-    console.log(new_user);
-    $.post(
-      "http://localhost:8000/sign_in",
-      JSON.stringify(new_user),
-      (data) => {
-        console.log(data);
-        if (data.response == true) {
-          document.cookie = `username=${username}`;
-
-          window.location.href = "transactions.html";
-        }
-      }
-    );
-  });
-
-  function displayBlockchain(blockchain) {
-    for (let block of blockchain) {
-      console.log(`Block ${block.index}:`);
-      console.log(`Hash: ${block.hash}`);
-      console.log(`Previous Hash: ${block.previous_hash}`);
-      console.log(`Timestamp: ${block.timestamp}`);
-      console.log(`Nonce: ${block.nonce}`);
-      console.log(`Transactions:`);
-      for (let transaction of block.transactions) {
-        console.log(`Sender: ${transaction.sender}`);
-        console.log(`Receiver: ${transaction.receiver}`);
-        console.log(`Amount: ${transaction.amount}`);
-        console.log(`Signature: ${transaction.signature}`);
-      }
-      console.log('\n');
-    }
-  };
-
   function printBlockchain(blockchain) {
     const table = document.getElementById("blockchain-table");
     table.innerHTML = ""; // Clear the table contents
@@ -195,35 +100,37 @@ $(document).ready(() => {
     }
   };
 
+  $.ajax({
+    url: "http://localhost:8080/get_blockchain",
+    dataType: "json",
+    success: function (response) {
+      printBlockchain(response);
+      // displayBlockchain(response);
 
-  $("#get-blockchain-button").click(() => {
-    $.ajax({
-      url: "http://localhost:8080/get_blockchain",
-      dataType: "json",
-      success: function (response) {
-        printBlockchain(response);
-        // displayBlockchain(response);
-
-      },
-      error: function (jqXHR, textStatus, errorThrown) {
-        console.log("Error:", errorThrown);
-      },
-    });
+    },
+    error: function (jqXHR, textStatus, errorThrown) {
+      console.log("Error:", errorThrown);
+    },
   });
 
 
-  $("#valid-blockchain-button").click(() => {
-    $.ajax({
-      url: "http://localhost:8080/is_valid",
-      dataType: "json",
-      success: function (response) {
-        console.log(response.message);
-        $("#blockchain-data").text(response.message);
-      },
-      error: function (jqXHR, textStatus, errorThrown) {
-        console.log("Error:", errorThrown);
-      },
-    });
+
+  $.ajax({
+    url: "http://localhost:8080/is_valid",
+    dataType: "json",
+    success: function (response) {
+      console.log(response.message);
+      $("#blockchain-data").text(response.message);
+      if (response.is_valid === true) {
+        $("#validity").css("background-color", "green");
+      } else {
+        $("#validity").css("background-color", "red");
+      }
+    },
+    error: function (jqXHR, textStatus, errorThrown) {
+      console.log("Error:", errorThrown);
+    },
   });
 
 });
+

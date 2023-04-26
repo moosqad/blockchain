@@ -7,7 +7,6 @@
 #include <string>
 
 #include "blockchain.cpp"
-#include "registration.cpp"
 
 namespace asio = boost::asio;
 namespace beast = boost::beast;
@@ -18,8 +17,6 @@ using namespace std;
 
 int main() {
   Blockchain blockchain(4);
-  Users adm("", "", "", "", "", "admin", "admin");
-  adm.add_user();
 
   // Set up the server
   asio::io_context io_context;
@@ -63,56 +60,20 @@ int main() {
         response.body() = "Transaction added to the blockchain.";
         http::write(socket, response);
       } else if (request.method() == http::verb::post &&
-                 request.target() == "/add_user") {
+                 request.target() == "/get_sum") {
         cout << "POST: ";
-
+        // Парсинг данных запроса в JSON формат
         nlohmann::json json_data = nlohmann::json::parse(request.body().data());
-        std::string username = json_data["username"];
-        std::string password = json_data["password"];
-        std::string first_name = json_data["first_name"];
-        std::string second_name = json_data["second_name"];
-        std::string third_name = json_data["third_name"];
-        std::string phone = json_data["phone"];
-        std::string email = json_data["email"];
-
-        Users new_user(first_name, second_name, third_name, phone, email,
-                       username, password);
-
-        bool is_exist = !new_user.user_exists();
-
-        nlohmann::json json_result = {
-            {"response", is_exist},
-            {"message", is_exist ? "Вы успешно зарегестрировались"
-                                 : "Пользователь с таким никнеймом уже "
-                                   "существует. Попробуйте другой"}};
-
-        if (is_exist) {
-          new_user.add_user();
-        }
+        std::string receiver = json_data["receiver"];
+        double ans = blockchain.getReceiverTotal(receiver);
+        // Добавляем транзакцию в блокчейн
+        nlohmann::json json_result = {{"response", ans}};
 
         response.result(http::status::ok);
         response.set(http::field::content_type, "application/json");
         response.body() = json_result.dump();
         http::write(socket, response);
-      } else if (request.method() == http::verb::post &&
-                 request.target() == "/sign_in") {
-        cout << "POST: ";
 
-        nlohmann::json json_data = nlohmann::json::parse(request.body().data());
-        std::string nickname = json_data["username"];
-        std::string password = json_data["password"];
-        Users new_user("", "", "", "", "", nickname, password);
-
-        bool is_exist = new_user.is_valid_username_password();
-
-        nlohmann::json json_result = {
-            {"response", is_exist},
-        };
-
-        response.result(http::status::ok);
-        response.set(http::field::content_type, "application/json");
-        response.body() = json_result.dump();
-        http::write(socket, response);
       } else if (request.method() == http::verb::get &&
                  request.target() == "/is_valid") {
         bool is_valid = blockchain.isValid(blockchain.db);

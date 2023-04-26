@@ -77,7 +77,7 @@ class Users {
     return result == SQLITE_ROW;
   }
 
-  void update_cash_amount(float amount) {
+  void update_cash_amount(float amount, string username) {
     cash_amount += amount;
     string sql = "UPDATE users SET cash_amount=? WHERE username=?;";
     sqlite3_stmt* stmt;
@@ -88,7 +88,7 @@ class Users {
     sqlite3_finalize(stmt);
   }
 
-  int get_user_cash_amount(string username) {
+  int get_user_cash_amount() {
     string sql = "SELECT cash_amount FROM users WHERE username=?;";
     sqlite3_stmt* stmt;
     sqlite3_prepare_v2(db, sql.c_str(), -1, &stmt, NULL);
@@ -97,6 +97,8 @@ class Users {
     int cash_amount = 0;
     if (result == SQLITE_ROW) {
       cash_amount = sqlite3_column_int(stmt, 0);
+    } else {
+      cout << "NO RECORDS WITH THIS USERNAME";
     }
     sqlite3_finalize(stmt);
     sqlite3_close(db);

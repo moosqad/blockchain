@@ -10,29 +10,13 @@
 </head>
 
 <body>
-  <h1>Blockchain Client</h1>
-  <form id="add-transaction-form">
-    <h2>Add Transaction</h2>
-    <label for="sender-input">Sender:</label>
-    <input type="text" id="sender-input" required />
-    <br />
-    <label for="receiver-input">Receiver:</label>
-
-    <input type="text" id="receiver-input" required />
-    <br />
-    <label for="amount-input">Amount:</label>
-    <input type="number" id="amount-input" required />
-    <br />
-    <br />
-    <button type="submit">Add Transaction</button>
-  </form>
 
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-  <script src="script.js"></script>
-  <button id="get-blockchain-button">Get Blockchain</button>
-  <button id="valid-blockchain-button">Is Blockchain Valid</button>
+  <script src="transactions.js"></script>
+  <div id="validity">
+    <p id="blockchain-data"></p>
+  </div>
   <table id="blockchain-table"></table>
-  <p id="blockchain-data">Data</p>
   <p id="user_balance">0</p>
 
 </body>

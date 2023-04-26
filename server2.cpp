@@ -7,6 +7,7 @@
 #include <string>
 
 #include "charity.cpp"
+#include "registration.cpp"
 
 namespace asio = boost::asio;
 namespace beast = boost::beast;
@@ -17,6 +18,8 @@ using namespace std;
 
 int main() {
   sqlite3* db;
+  Users adm("", "", "", "", "", "admin", "admin");
+  adm.add_user();
   if (sqlite3_open("charity.db", &db) != SQLITE_OK) {
     std::cerr << "Error opening database: " << sqlite3_errmsg(db) << std::endl;
     return 1;
@@ -24,8 +27,8 @@ int main() {
   Filial filial(db);
   Worker worker(db);
   Help help(db);
-  help.createHelp("Иванов", "Иван", "Иванович", "Пропал", 12, 1);
-  help.createHelp("ФАмилия", "Имя", "Отчество", "Сирота", 3254353, 2);
+  help.createHelp("Иванов", "Иван", "Иванович", "Пропал", 12000, 1);
+  help.createHelp("Петров", "Петр", "Петрович", "Сирота", 10000, 2);
   Volunteer volunteer(db);
   Contractor contractor(db);
   Contract contract(db);
@@ -60,6 +63,57 @@ int main() {
         response.body() = data;
         http::write(socket, response);
       } else if (request.method() == http::verb::post &&
+                 request.target() == "/add_user") {
+        cout << "POST: ";
+
+        nlohmann::json json_data = nlohmann::json::parse(request.body().data());
+        std::string username = json_data["username"];
+        std::string password = json_data["password"];
+        std::string first_name = json_data["first_name"];
+        std::string second_name = json_data["second_name"];
+        std::string third_name = json_data["third_name"];
+        std::string phone = json_data["phone"];
+        std::string email = json_data["email"];
+
+        Users new_user(first_name, second_name, third_name, phone, email,
+                       username, password);
+
+        bool is_exist = !new_user.user_exists();
+
+        nlohmann::json json_result = {
+            {"response", is_exist},
+            {"message", is_exist ? "Вы успешно зарегестрировались"
+                                 : "Пользователь с таким никнеймом уже "
+                                   "существует. Попробуйте другой"}};
+
+        if (is_exist) {
+          new_user.add_user();
+        }
+
+        response.result(http::status::ok);
+        response.set(http::field::content_type, "application/json");
+        response.body() = json_result.dump();
+        http::write(socket, response);
+      } else if (request.method() == http::verb::post &&
+                 request.target() == "/sign_in") {
+        cout << "POST: ";
+
+        nlohmann::json json_data = nlohmann::json::parse(request.body().data());
+        std::string username = json_data["username"];
+        std::string password = json_data["password"];
+        Users new_user("", "", "", "", "", username, password);
+
+        bool is_exist = new_user.is_valid_username_password();
+
+        nlohmann::json json_result = {
+            {"response", is_exist},
+        };
+
+        response.result(http::status::ok);
+        response.set(http::field::content_type, "application/json");
+        response.body() = json_result.dump();
+        http::write(socket, response);
+      } else if (request.method() == http::verb::post &&
                  request.target() == "/update") {
         cout << "POST: UPDATE:";
         // Парсинг данных запроса в JSON формат
@@ -82,6 +136,39 @@ int main() {
         response.result(http::status::ok);
         response.set(http::field::content_type, "text/json");
         response.body() = "Help information updated successfully.";
+        http::write(socket, response);
+      } else if (request.method() == http::verb::post &&
+                 request.target() == "/get_balance") {
+        cout << "Get: GET BALANCE:";
+        // Парсинг данных запроса в JSON формат
+        nlohmann::json req_body = nlohmann::json::parse(request.body());
+        // Получаем параметры для обновления помощи
+        std::string username = req_body["username"];
+        Users new_user("", "", "", "", "", username, "");
+        // Обновляем информацию о помощи в базе данных
+        nlohmann::json json_result = {
+            {"balance", new_user.get_user_cash_amount()}};
+
+        response.result(http::status::ok);
+        response.set(http::field::content_type, "application/json");
+        response.body() = json_result.dump();
+        http::write(socket, response);
+      } else if (request.method() == http::verb::post &&
+                 request.target() == "/update_balance") {
+        cout << "POST: GET BALANCE:";
+        // Парсинг данных запроса в JSON формат
+        nlohmann::json req_body = nlohmann::json::parse(request.body());
+        // Получаем параметры для обновления помощи
+        int amount = req_body["amount"];
+        std::string username = req_body["username"];
+
+        // Обновляем информацию о помощи в базе данных
+        adm.update_cash_amount(amount, username);
+
+        // Возвращаем ответ клиенту
+        response.result(http::status::ok);
+        response.set(http::field::content_type, "text/json");
+        response.body() = "Cash balance updated successfully.";
         http::write(socket, response);
       } else if (request.method() == http::verb::post &&
                  request.target() == "/create") {

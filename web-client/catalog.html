@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <title>Help Data</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+</head>
+
+<body>
+  <div class="container mt-5">
+    <h1 class="text-center mb-4">Данные об участниках фонда</h1>
+
+    <div class="table-responsive">
+      <table id="helpTable" class="table table-bordered table-striped">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Имя</th>
+            <th>Фамилия</th>
+            <th>Отчество</th>
+            <th>Проблема</th>
+            <th>Цель сбора(руб.)</th>
+            <th>Уже собрано(руб.)</th>
+            <th>Filial ID</th>
+
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+
+    <div id="updateForm" class="mt-4" style="display: none;">
+      <h2>Пожертвовать</h2>
+      <form>
+        <div class="form-group">
+          <label for="id">кому [ID]:</label>
+          <input type="text" id="id" name="id" class="form-control">
+        </div>
+
+        <div class="form-group">
+          <label for="firstName">Кому [Имя]:</label>
+          <input type="text" id="firstName" name="firstName" class="form-control">
+        </div>
+
+        <div class="form-group">
+          <label for="secondName">Кому [Фамилия]:</label>
+          <input type="text" id="secondName" name="secondName" class="form-control">
+        </div>
+
+        <div class="form-group">
+          <label for="thirdName">Кому [Отчество]:</label>
+          <input type="text" id="thirdName" name="thirdName" class="form-control">
+        </div>
+
+
+        <div class="form-group">
+          <label for="moneyGoal">Сумма пожертвования:</label>
+          <input type="number" id="moneyGoal" name="moneyGoal" class="form-control">
+        </div>
+
+        <button type="submit" class="btn btn-primary">Подтвердить</button>
+        <p id="status"></p>
+      </form>
+    </div>
+  </div>
+
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.24.0/axios.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+  <script src="catalog.js"></script>
+  <script src="script.js"></script>
+</body>
+
+</html>

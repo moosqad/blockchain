@@ -144,6 +144,26 @@ class Blockchain {
       cerr << "Error creating transactions table: " << errmsg << endl;
     }
   }
+  // Function to get the sum of every transaction for a specific receiver
+  double getReceiverTotal(string receiver) {
+    string sql = "SELECT sum(amount) FROM transactions WHERE receiver='" +
+                 receiver + "'";
+    sqlite3_stmt* stmt;
+    double total = 0;
+    int rc = sqlite3_prepare_v2(db, sql.c_str(), -1, &stmt, NULL);
+    if (rc != SQLITE_OK) {
+      cerr << "Error preparing statement: " << sqlite3_errmsg(db) << endl;
+      return total;
+    }
+    rc = sqlite3_step(stmt);
+    if (rc == SQLITE_ROW) {
+      total = sqlite3_column_double(stmt, 0);
+    } else {
+      cerr << "Error getting receiver total: " << sqlite3_errmsg(db) << endl;
+    }
+    sqlite3_finalize(stmt);
+    return total;
+  }
 
   // Функция создания первого (genesis) блока
   Block createGenesisBlock() {
