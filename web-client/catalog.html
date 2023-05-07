@@ -3,17 +3,60 @@
 
 <head>
   <meta charset="UTF-8">
-  <title>Help Data</title>
+  <title>Помощь</title>
   <link rel="stylesheet" href="style.css">
   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+  <link href="https://fonts.googleapis.com/css?family=Montserrat:400,600,700,700i|Oswald:400,500,600,700&display=swap"
+    rel="stylesheet">
+  <!подключаем коммерчески бесплатные шрифты из библиотеки google fonts>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Jost:ital,wght@0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200&display=swap"
+      rel="stylesheet">
+    <link rel="icon" type="image/png" href="russia.png">
 </head>
 
 <body>
+  <header>
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+      <a class="navbar-brand" href="#">
+        <img src="logo.png" alt="Logo" width="50%" height="50%">
+      </a>
+
+      <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <ul class="navbar-nav mr-auto">
+          <li class="nav-item">
+            <a class="nav-link" href="#">Блокчейн</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link nav-link-active" href="#">Нужна помощь</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#">О фонде</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link nav-adm" href="#"></a>
+          </li>
+        </ul>
+
+        <ul class="navbar-nav ml-auto">
+          <li class="nav-item">
+            <span class="nav-username navbar-text mr-3">Имя пользователя</span>
+          </li>
+          <li class="nav-item">
+            <span class="nav-balance navbar-text">Войдите</span>
+          </li>
+        </ul>
+      </div>
+    </nav>
+  </header>
+
+
   <div class="container mt-5">
-    <h1 class="text-center mb-4">Данные об участниках фонда</h1>
 
     <div class="table-responsive">
-      <table id="helpTable" class="table table-bordered table-striped">
+      <table id="helpTable" class="table table-bordered table-striped rounded-table">
         <thead>
           <tr>
             <th>ID</th>
@@ -23,48 +66,50 @@
             <th>Проблема</th>
             <th>Цель сбора(руб.)</th>
             <th>Уже собрано(руб.)</th>
-            <th>Filial ID</th>
-
+            <th>Номер филиала</th>
           </tr>
         </thead>
         <tbody></tbody>
       </table>
     </div>
 
-    <div id="updateForm" class="mt-4" style="display: none;">
-      <h2>Пожертвовать</h2>
-      <form>
-        <div class="form-group">
-          <label for="id">кому [ID]:</label>
-          <input type="text" id="id" name="id" class="form-control">
-        </div>
+    <div id="updateForm" style="display: none;">
+      <div class="card-body">
+        <h2 class="card-title">Пожертвовать</h2>
+        <form>
+          <div class="form-group">
+            <label for="id">[ID]:</label>
+            <input type="text" id="id" name="id" class="form-control" readonly>
+          </div>
 
-        <div class="form-group">
-          <label for="firstName">Кому [Имя]:</label>
-          <input type="text" id="firstName" name="firstName" class="form-control">
-        </div>
+          <div class="form-group">
+            <label for="firstName">[Имя]:</label>
+            <input type="text" id="firstName" name="firstName" class="form-control" readonly>
+          </div>
 
-        <div class="form-group">
-          <label for="secondName">Кому [Фамилия]:</label>
-          <input type="text" id="secondName" name="secondName" class="form-control">
-        </div>
+          <div class="form-group">
+            <label for="secondName">[Фамилия]:</label>
+            <input type="text" id="secondName" name="secondName" class="form-control" readonly>
+          </div>
 
-        <div class="form-group">
-          <label for="thirdName">Кому [Отчество]:</label>
-          <input type="text" id="thirdName" name="thirdName" class="form-control">
-        </div>
+          <div class="form-group">
+            <label for="thirdName">[Отчество]:</label>
+            <input type="text" id="thirdName" name="thirdName" class="form-control" readonly>
+          </div>
 
+          <div class="form-group">
+            <label for="moneyGoal">Сумма:</label>
+            <input type="number" id="moneyGoal" name="moneyGoal" class="form-control">
+          </div>
 
-        <div class="form-group">
-          <label for="moneyGoal">Сумма пожертвования:</label>
-          <input type="number" id="moneyGoal" name="moneyGoal" class="form-control">
-        </div>
-
-        <button type="submit" class="btn btn-primary">Подтвердить</button>
-        <p id="status"></p>
-      </form>
+          <button type="submit" class="btn-primary">Подтвердить</button>
+          <p id="status"></p>
+        </form>
+      </div>
     </div>
+
   </div>
+
 
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.24.0/axios.min.js"></script>
@@ -72,6 +117,8 @@
   <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
   <script src="catalog.js"></script>
   <script src="script.js"></script>
+  <script src="user.js"></script>
+
 </body>
 
 </html>

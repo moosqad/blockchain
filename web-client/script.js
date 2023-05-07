@@ -8,7 +8,6 @@ $(document).ready(() => {
   document.cookie = `expires=${expirationTime.toUTCString()};`;
 
 
-  console.log("username:", username);
 
   $("#add-transaction-form").submit((event) => {
     event.preventDefault();

@@ -143,11 +143,12 @@ int main() {
         // Парсинг данных запроса в JSON формат
         nlohmann::json req_body = nlohmann::json::parse(request.body());
         // Получаем параметры для обновления помощи
+
         std::string username = req_body["username"];
-        Users new_user("", "", "", "", "", username, "");
+        // Users new_user(username, "", "", "", "", "", "");
         // Обновляем информацию о помощи в базе данных
         nlohmann::json json_result = {
-            {"balance", new_user.get_user_cash_amount()}};
+            {"balance", adm.get_user_cash_amount(username)}};
 
         response.result(http::status::ok);
         response.set(http::field::content_type, "application/json");
@@ -161,14 +162,31 @@ int main() {
         // Получаем параметры для обновления помощи
         int amount = req_body["amount"];
         std::string username = req_body["username"];
-
+        Users new_user("", "", "", "", "", "", "");
         // Обновляем информацию о помощи в базе данных
-        adm.update_cash_amount(amount, username);
+        new_user.update_cash_amount(amount, username);
 
         // Возвращаем ответ клиенту
         response.result(http::status::ok);
         response.set(http::field::content_type, "text/json");
         response.body() = "Cash balance updated successfully.";
+        http::write(socket, response);
+
+      } else if (request.method() == http::verb::post &&
+                 request.target() == "/get_user_info") {
+        cout << "POST: GET USER INFO:";
+        // Парсинг данных запроса в JSON формат
+        nlohmann::json req_body = nlohmann::json::parse(request.body());
+        // Получаем параметры для обновления помощи
+        std::string username = req_body["username"];
+        Users new_user("", "", "", "", "", "", "");
+        // Обновляем информацию о помощи в базе данных
+        string user_info = new_user.get_user_info(username);
+
+        // Возвращаем ответ клиенту
+        response.result(http::status::ok);
+        response.set(http::field::content_type, "text/json");
+        response.body() = user_info;
         http::write(socket, response);
       } else if (request.method() == http::verb::post &&
                  request.target() == "/create") {

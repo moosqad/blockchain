@@ -1,10 +1,12 @@
 #include <sqlite3.h>
 
 #include <iostream>
+#include <nlohmann/json.hpp>
 #include <string>
 
 using namespace std;
 
+using Json = nlohmann::json;
 class Users {
  public:
   string first_name;
@@ -78,17 +80,20 @@ class Users {
   }
 
   void update_cash_amount(float amount, string username) {
-    cash_amount += amount;
+    cash_amount =
+        get_user_cash_amount(username) - amount;  // Update the member variable
+
     string sql = "UPDATE users SET cash_amount=? WHERE username=?;";
     sqlite3_stmt* stmt;
     sqlite3_prepare_v2(db, sql.c_str(), -1, &stmt, NULL);
-    sqlite3_bind_int(stmt, 1, cash_amount);
+    sqlite3_bind_double(stmt, 1,
+                        static_cast<double>(cash_amount));  // Cast to double
     sqlite3_bind_text(stmt, 2, username.c_str(), -1, SQLITE_STATIC);
     sqlite3_step(stmt);
     sqlite3_finalize(stmt);
   }
 
-  int get_user_cash_amount() {
+  int get_user_cash_amount(string username) {
     string sql = "SELECT cash_amount FROM users WHERE username=?;";
     sqlite3_stmt* stmt;
     sqlite3_prepare_v2(db, sql.c_str(), -1, &stmt, NULL);
@@ -101,8 +106,45 @@ class Users {
       cout << "NO RECORDS WITH THIS USERNAME";
     }
     sqlite3_finalize(stmt);
-    sqlite3_close(db);
+    // sqlite3_close(db);
     return cash_amount;
+  }
+
+  string get_user_info(string username) {
+    string sql = "SELECT * FROM users WHERE username=?;";
+    sqlite3_stmt* stmt;
+    sqlite3_prepare_v2(db, sql.c_str(), -1, &stmt, NULL);
+    sqlite3_bind_text(stmt, 1, username.c_str(), -1, SQLITE_STATIC);
+    int result = sqlite3_step(stmt);
+
+    if (result == SQLITE_ROW) {
+      Json userJson;
+
+      userJson["username"] =
+          reinterpret_cast<const char*>(sqlite3_column_text(stmt, 0));
+      userJson["password"] =
+          reinterpret_cast<const char*>(sqlite3_column_text(stmt, 1));
+      userJson["first_name"] =
+          reinterpret_cast<const char*>(sqlite3_column_text(stmt, 2));
+      userJson["second_name"] =
+          reinterpret_cast<const char*>(sqlite3_column_text(stmt, 3));
+      userJson["third_name"] =
+          reinterpret_cast<const char*>(sqlite3_column_text(stmt, 4));
+      userJson["phone_number"] =
+          reinterpret_cast<const char*>(sqlite3_column_text(stmt, 5));
+      userJson["email"] =
+          reinterpret_cast<const char*>(sqlite3_column_text(stmt, 6));
+      userJson["cash_amount"] = sqlite3_column_double(stmt, 7);
+
+      sqlite3_finalize(stmt);
+      sqlite3_close(db);
+
+      return userJson.dump(4);
+    } else {
+      sqlite3_finalize(stmt);
+      // sqlite3_close(db);
+      return "{}";  // Return an empty JSON object if user is not found
+    }
   }
 
  private:

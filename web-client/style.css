@@ -1,20 +1,5 @@
-body {
-  /*фон в виде градиента из нескольких цветов*/
-  position: relative;
-  padding-bottom: 3.25%;
-  height: 100%;
-
-  margin: 50;
-  font-family: Arial, sans-serif;
-}
-
 h1 {
   text-align: center;
-}
-
-th {
-  background: black;
-  color: white;
 }
 
 form {
@@ -95,3 +80,177 @@ button {
   font-family: bold;
   font-size: 30px;
 }
+
+.card {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #1d78d4;
+}
+
+.card-body {
+  width: 100%;
+  max-width: 400px;
+  max-width: 400px;
+  /* Adjust the value as needed */
+  text-align: center;
+  margin: auto;
+  border-radius: 5px;
+  background-color: #ffffff;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.card-title {
+  font-size: 24px;
+  font-weight: bold;
+  margin-bottom: 20px;
+}
+
+.form-group {
+  margin-bottom: 20px;
+}
+
+label {
+  font-weight: bold;
+  position: left;
+}
+
+.rounded-table {
+  border-radius: 40px;
+}
+
+.btn-primary {
+  width: 100%;
+  padding: 10px;
+  font-size: 16px;
+  font-weight: bold;
+  border-radius: 5px;
+  background-color: #007bff;
+  border: none;
+}
+
+.btn-primary:hover {
+  background-color: #0069d9;
+}
+
+.button-primary {
+  display: inline-block;
+  padding: 10px 20px;
+  font-size: 16px;
+  font-weight: bold;
+  text-align: center;
+  text-transform: uppercase;
+  color: #ffffff;
+  background-color: #0aa427;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.button-primary:hover {
+  background-color: #0aa427;
+}
+
+body {
+  overflow-y: auto;
+}
+
+.container mt-5 {
+  display: flex;
+  flex-direction: column;
+}
+
+#updateForm {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+}
+
+.table-responsive {
+  overflow: hidden;
+  border-radius: 20px;
+}
+
+.table-responsive table {
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+.table-responsive table tr:first-child th:first-child {
+  border-top-left-radius: 20px;
+}
+
+.table-responsive table tr:first-child th:last-child {
+  border-top-right-radius: 20px;
+}
+
+.table-responsive table tr:last-child td:first-child {
+  border-bottom-left-radius: 20px;
+}
+
+.table-responsive table tr:last-child td:last-child {
+  border-bottom-right-radius: 20px;
+}
+
+.nav-link-active::before {
+  content: "•";
+  display: inline-block;
+  margin-right: 5px;
+  font-weight: bold;
+  color: red;
+}
+
+.nav-link-active {
+  content: "•";
+  display: inline-block;
+  text-decoration: underline;
+  text-decoration-color: blue;
+  font-weight: bold;
+  margin-right: 5px;
+}
+
+.nav-item {
+  color: #fff;
+  font-size: 20px;
+}
+
+.nav-balance nav-username {
+  font-weight: bold;
+}
+
+
+
+/*
+Общие параметры для многих классов и тегов:
+position - задает позицию для элементов
+height width - высота ширина
+margin - расстояние от родительского элемента
+padding - задает элементу поле
+min/max height/width - макс/мин ширина/высота
+z-index нужен для "иерархии эелементов", т.е. он показывает, какой элемент должен быть сверху, а какой снизу по отношению к другим соседним дочерним или родительским элементам
+color - цвет эелемента
+opacity - прозрачность
+-moz/webkit/ms- для корректного отображения в разных браузерах
+vh vw - единица измерения относительно текущего размера окна
+font-famaly стиль шрифта
+font-size - размер шрифта
+font-weight - толщина шрифта
+
+position absolute - Положение элемента задается свойствами left, top, right и bottom, 
+также на положение влияет значение свойства position родительского элемента.
+Так, если у родителя значение position установлено как static или родителя нет,
+то отсчет координат ведется от края окна браузера
+
+
+position fixed - По своему действию это значение близко к absolute, 
+но в отличие от него привязывается к указанной свойствами left, top, right и bottom
+точке на экране и не меняет своего положения при прокрутке веб-страницы.
+
+position realtive - Положение элемента устанавливается относительно его исходного места.
+Добавление свойств left, top, right и bottom изменяет позицию элемента и сдвигает его в ту или
+иную сторону от первоначального расположения.
+
+*/
