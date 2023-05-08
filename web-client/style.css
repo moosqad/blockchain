@@ -6,11 +6,6 @@ form {
   margin-bottom: 20px;
 }
 
-label {
-  display: inline-block;
-  width: 100px;
-  text-align: right;
-}
 
 input[type="text"],
 input[type="number"] {
@@ -22,8 +17,16 @@ button {
 }
 
 #blockchain-data {
-  font-weight: 100;
-  color: blue;
+  font-size: 30px;
+  font-family: bold;
+  color: white;
+  text-align: center;
+  margin-left: 2vw;
+  width: 100%;
+}
+
+.card-text {
+  font-size: 10px;
 }
 
 .form-control {
@@ -97,7 +100,7 @@ button {
   margin: auto;
   border-radius: 5px;
   background-color: #ffffff;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 4px rgba(1, 0, 0, 0.7);
 }
 
 .card-title {
@@ -141,23 +144,68 @@ label {
   text-align: center;
   text-transform: uppercase;
   color: #ffffff;
-  background-color: #0aa427;
+  background-color: #237A57;
   border: none;
   border-radius: 5px;
   cursor: pointer;
 }
 
-.button-primary:hover {
-  background-color: #0aa427;
+
+table td {
+  font-size: 20px;
+  /* Replace 16px with your desired font size */
 }
+
+.button-vol {
+  display: inline-block;
+  padding: 10px 20px;
+  font-size: 16px;
+  font-weight: bold;
+  text-align: center;
+  text-transform: uppercase;
+  color: #ffffff;
+  background-color: #3b81d6;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
 
 body {
   overflow-y: auto;
+  overflow-x: auto;
 }
 
-.container mt-5 {
-  display: flex;
-  flex-direction: column;
+.container-fluid {
+  overflow-x: hidden;
+}
+
+#searchInput,
+#filterId,
+#filterFirstName,
+#filterLastName,
+#filterThirdName,
+#filterProblem,
+#filterMoneyGoal {
+  background-color: rgba(255, 255, 255, 0.3);
+}
+
+#searchInput::placeholder,
+#filterId::placeholder,
+#filterFirstName::placeholder,
+#filterLastName::placeholder,
+#filterThirdName::placeholder,
+#filterProblem::placeholder,
+#filterMoneyGoal::placeholder,
+#searchInput::-webkit-input-placeholder,
+#filterId::-webkit-input-placeholder,
+#filterFirstName::-webkit-input-placeholder,
+#filterLastName::-webkit-input-placeholder,
+#filterThirdName::-webkit-input-placeholder,
+#filterProblem::-webkit-input-placeholder,
+#filterMoneyGoal::-webkit-input-placeholder {
+  color: black;
+  opacity: 0.7;
 }
 
 #updateForm {
@@ -170,7 +218,8 @@ body {
 }
 
 .table-responsive {
-  overflow: hidden;
+  overflow-x: auto;
+  overflow-y: hidden;
   border-radius: 20px;
 }
 
@@ -195,33 +244,146 @@ body {
   border-bottom-right-radius: 20px;
 }
 
+
+
+#helpTable {
+  width: 100%;
+  white-space: nowrap;
+}
+
+
+
 .nav-link-active::before {
   content: "•";
   display: inline-block;
   margin-right: 5px;
   font-weight: bold;
-  color: red;
+  color: blue;
 }
 
 .nav-link-active {
   content: "•";
   display: inline-block;
   text-decoration: underline;
-  text-decoration-color: blue;
+  text-decoration-color: red;
   font-weight: bold;
   margin-right: 5px;
 }
 
 .nav-item {
-  color: #fff;
+  color: #ffffff;
   font-size: 20px;
+  white-space: nowrap;
 }
 
 .nav-balance nav-username {
   font-weight: bold;
 }
 
+.nav-link {
+  color: rgb(255, 255, 255) !important;
+}
 
+#searchInput {
+  width: 600px !important;
+  /* Adjust the width as needed */
+}
+
+.form-control.search-field {
+  border-radius: 0;
+  border-color: #ccc;
+}
+
+/* Style the search input field */
+#searchInput {
+  width: 100%;
+  padding: 8px;
+  font-size: 16px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-sizing: border-box;
+}
+
+/* Adjust the margin between filter fields */
+.col-md-2 {
+  margin-bottom: 10px;
+}
+
+.navbar {
+  background: #2c3e50;
+  /* fallback for old browsers */
+  background: -webkit-linear-gradient(to right, #3498db, #2c3e50);
+  /* Chrome 10-25, Safari 5.1-6 */
+  background: linear-gradient(to right, #3498db, #2c3e50);
+  /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
+
+}
+
+nav ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+nav ul li {
+  display: inline-block;
+  position: relative;
+}
+
+nav ul li a {
+  display: block;
+  padding: 10px;
+  color: #333;
+  text-decoration: none;
+}
+
+nav ul li:hover>.dropdown-menu {
+  display: block;
+}
+
+.dropdown-menu {
+  display: none;
+  position: absolute;
+  top: 100%;
+  left: 0;
+  min-width: 120px;
+  padding: 10px;
+  background-color: #f1f1f1;
+  border: 1px solid #ccc;
+}
+
+.dropdown-menu li {
+  display: block;
+  margin: 5px 0;
+}
+
+.dropdown-menu li a {
+  display: block;
+  padding: 5px;
+  color: #333;
+  text-decoration: none;
+}
+
+
+.username-box {
+  display: inline-block;
+  background: #237A57;
+  /* fallback for old browsers */
+
+  /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
+
+
+
+  border-radius: 10px;
+  padding: 5px 10px;
+  margin-right: 10px;
+}
+
+
+.username-box::hover {
+  display: inline-block;
+  background: #28ae79;
+}
 
 /*
 Общие параметры для многих классов и тегов:

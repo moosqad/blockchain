@@ -25,6 +25,52 @@ class Filial {
       sqlite3_free(errorMsg);
     }
   }
+  std::string getFilialByID(int filialId) {
+    const std::string sql = "SELECT * FROM filials WHERE filial_id = ?;";
+    sqlite3_stmt* stmt = nullptr;
+    if (sqlite3_prepare_v2(m_db, sql.c_str(), -1, &stmt, nullptr) !=
+        SQLITE_OK) {
+      std::cerr << "Error preparing statement: " << sqlite3_errmsg(m_db)
+                << std::endl;
+      return "";
+    }
+
+    // Bind the filialId parameter to the prepared statement
+    if (sqlite3_bind_int(stmt, 1, filialId) != SQLITE_OK) {
+      std::cerr << "Error binding parameter: " << sqlite3_errmsg(m_db)
+                << std::endl;
+      sqlite3_finalize(stmt);
+      return "";
+    }
+
+    nlohmann::json result;
+    if (sqlite3_step(stmt) == SQLITE_ROW) {
+      // Read the row data into variables
+      int id = sqlite3_column_int(stmt, 0);
+      std::string city =
+          reinterpret_cast<const char*>(sqlite3_column_text(stmt, 1));
+      std::string street =
+          reinterpret_cast<const char*>(sqlite3_column_text(stmt, 2));
+      std::string house =
+          reinterpret_cast<const char*>(sqlite3_column_text(stmt, 3));
+      std::string phone_number =
+          reinterpret_cast<const char*>(sqlite3_column_text(stmt, 4));
+
+      // Create a JSON object for the filial
+      nlohmann::json filial;
+      filial["filial_id"] = id;
+      filial["city"] = city;
+      filial["street"] = street;
+      filial["house"] = house;
+      filial["phone_number"] = phone_number;
+
+      result = filial;
+    }
+
+    sqlite3_finalize(stmt);
+
+    return result.dump();
+  }
 
  private:
   sqlite3* m_db;
@@ -277,6 +323,37 @@ class Volunteer {
     }
   }
 
+  void addRecord(const std::string& firstName, const std::string& lastName,
+                 const std::string& thirdName, const std::string& phoneNumber,
+                 const std::string& email, int filialId) {
+    const std::string sql =
+        "INSERT INTO volunteers (first_name, second_name, third_name, "
+        "phone_number, email, "
+        "filial_id) "
+        "VALUES (?, ?, ?, ?, ?, ?);";
+    sqlite3_stmt* stmt;
+    if (sqlite3_prepare_v2(m_db, sql.c_str(), -1, &stmt, nullptr) !=
+        SQLITE_OK) {
+      std::cerr << "Error preparing add volunteer record statement: "
+                << sqlite3_errmsg(m_db) << std::endl;
+      return;
+    }
+
+    sqlite3_bind_text(stmt, 1, firstName.c_str(), -1, SQLITE_STATIC);
+    sqlite3_bind_text(stmt, 2, lastName.c_str(), -1, SQLITE_STATIC);
+    sqlite3_bind_text(stmt, 3, thirdName.c_str(), -1, SQLITE_STATIC);
+    sqlite3_bind_text(stmt, 4, phoneNumber.c_str(), -1, SQLITE_STATIC);
+    sqlite3_bind_text(stmt, 5, email.c_str(), -1, SQLITE_STATIC);
+    sqlite3_bind_int(stmt, 6, filialId);
+
+    if (sqlite3_step(stmt) != SQLITE_DONE) {
+      std::cerr << "Error adding volunteer record: " << sqlite3_errmsg(m_db)
+                << std::endl;
+    }
+
+    sqlite3_finalize(stmt);
+  }
+
  private:
   sqlite3* m_db;
 };
@@ -329,21 +406,3 @@ class Contract {
  private:
   sqlite3* m_db;
 };
-
-// int main() {
-//   sqlite3* db;
-//   if (sqlite3_open("charity.db", &db) != SQLITE_OK) {
-//     std::cerr << "Error opening database: " << sqlite3_errmsg(db) <<
-//     std::endl; return 1;
-//   }
-//   Filial filial(db);
-//   Worker worker(db);
-//   Help help(db);
-//   help.createHelp("sdfs", "", "", "", 12, 1);
-//   Volunteer volunteer(db);
-//   Contractor contractor(db);
-//   Contract contract(db);
-//   sqlite3_close(db);
-
-//   return 0;
-// }

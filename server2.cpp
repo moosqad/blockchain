@@ -155,6 +155,19 @@ int main() {
         response.body() = json_result.dump();
         http::write(socket, response);
       } else if (request.method() == http::verb::post &&
+                 request.target() == "/get_filial") {
+        cout << "Get: GET FILIAL:";
+        // Парсинг данных запроса в JSON формат
+        nlohmann::json req_body = nlohmann::json::parse(request.body());
+        // Получаем параметры для обновления помощи
+
+        int filial_id = req_body["filial_id"];
+
+        response.result(http::status::ok);
+        response.set(http::field::content_type, "application/json");
+        response.body() = filial.getFilialByID(filial_id);
+        http::write(socket, response);
+      } else if (request.method() == http::verb::post &&
                  request.target() == "/update_balance") {
         cout << "POST: GET BALANCE:";
         // Парсинг данных запроса в JSON формат
@@ -187,6 +200,28 @@ int main() {
         response.result(http::status::ok);
         response.set(http::field::content_type, "text/json");
         response.body() = user_info;
+        http::write(socket, response);
+      } else if (request.method() == http::verb::post &&
+                 request.target() == "/add_volunteer") {
+        cout << "POST: ADD VOLUNTEER:";
+        // Парсинг данных запроса в JSON формат
+        nlohmann::json req_body = nlohmann::json::parse(request.body());
+        // Получаем параметры для обновления помощи
+        std::string first_name = req_body["first_name"];
+        std::string second_name = req_body["second_name"];
+        std::string third_name = req_body["third_name"];
+        std::string phone_number = req_body["phone_number"];
+        std::string email = req_body["email"];
+        int filial_id = req_body["filial_id"];
+
+        // Обновляем информацию о помощи в базе данных
+        volunteer.addRecord(first_name, second_name, third_name, phone_number,
+                            email, filial_id);
+
+        // Возвращаем ответ клиенту
+        response.result(http::status::ok);
+        response.set(http::field::content_type, "text/json");
+        response.body() = "OK";
         http::write(socket, response);
       } else if (request.method() == http::verb::post &&
                  request.target() == "/create") {

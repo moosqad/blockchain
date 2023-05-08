@@ -15,11 +15,17 @@
       href="https://fonts.googleapis.com/css2?family=Jost:ital,wght@0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200&display=swap"
       rel="stylesheet">
     <link rel="icon" type="image/png" href="russia.png">
+    <style>
+      .card-body+.card-body {
+        margin-top: 1px;
+      }
+    </style>
+
 </head>
 
 <body>
   <header>
-    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <nav class="navbar navbar-expand-lg">
       <a class="navbar-brand" href="#">
         <img src="logo.png" alt="Logo" width="50%" height="50%">
       </a>
@@ -39,23 +45,60 @@
             <a class="nav-link nav-adm" href="#"></a>
           </li>
         </ul>
-
         <ul class="navbar-nav ml-auto">
           <li class="nav-item">
-            <span class="nav-username navbar-text mr-3">Имя пользователя</span>
+            <div class="username-box">
+              <span class="nav-balance navbar-text">Войдите</span>
+            </div>
           </li>
           <li class="nav-item">
-            <span class="nav-balance navbar-text">Войдите</span>
+            <div class="username-box">
+              <span class="nav-username navbar-text mr-3">Имя пользователя</span>
+            </div>
+            <ul class="dropdown-menu">
+              <li><a href="#" onclick="clearCookies();">Выйти</a></li>
+              <li><a href="#">Аккаунт</a></li>
+            </ul>
           </li>
         </ul>
       </div>
+      <script>
+        $(document).ready(function () {
+          $('.dropdown-toggle').dropdown();
+        });
+      </script>
     </nav>
   </header>
 
 
-  <div class="container mt-5">
+  <div class="container-fluid mt-5">
+    <div class="input-group mb-3">
+      <input type="text" id="searchInput" placeholder="Поиск по всей таблице">
+    </div>
 
+
+    <div class="row mb-3">
+      <div class="col-md-2">
+        <input type="text" id="filterId" class="form-control" placeholder="Поиск по ID">
+      </div>
+      <div class="col-md-2">
+        <input type="text" id="filterFirstName" class="form-control" placeholder="Поиск по имени">
+      </div>
+      <div class="col-md-2">
+        <input type="text" id="filterLastName" class="form-control" placeholder="Поиск по фамилии">
+      </div>
+      <div class="col-md-2">
+        <input type="text" id="filterThirdName" class="form-control" placeholder="Поиск по отчеству">
+      </div>
+      <div class="col-md-2">
+        <input type="text" id="filterProblem" class="form-control" placeholder="Поиск по проблеме">
+      </div>
+      <div class="col-md-2">
+        <input type="text" id="filterMoneyGoal" class="form-control" placeholder="Поиск по сумме сбора">
+      </div>
+    </div>
     <div class="table-responsive">
+
       <table id="helpTable" class="table table-bordered table-striped rounded-table">
         <thead>
           <tr>
@@ -71,6 +114,50 @@
         </thead>
         <tbody></tbody>
       </table>
+      <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+      <script>
+        $(document).ready(function () {
+          // Search functionality
+          $('#searchInput').on('keyup', function () {
+            var searchText = $(this).val().toLowerCase();
+            $('#helpTable tbody tr').filter(function () {
+              $(this).toggle($(this).text().toLowerCase().indexOf(searchText) > -1)
+            });
+          });
+        });
+      </script>
+      <script>
+        $(document).ready(function () {
+          // Filter functionality
+          $('#filterId, #filterFirstName, #filterLastName, #filterThirdName, #filterProblem, #filterMoneyGoal').on('keyup', function () {
+            var filterId = $('#filterId').val().toLowerCase();
+            var filterFirstName = $('#filterFirstName').val().toLowerCase();
+            var filterLastName = $('#filterLastName').val().toLowerCase();
+            var filterThirdName = $('#filterThirdName').val().toLowerCase();
+            var filterProblem = $('#filterProblem').val().toLowerCase();
+            var filterMoneyGoal = $('#filterMoneyGoal').val().toLowerCase();
+
+            $('#helpTable tbody tr').filter(function () {
+              var rowId = $(this).find('td:nth-child(1)').text().toLowerCase();
+              var rowFirstName = $(this).find('td:nth-child(2)').text().toLowerCase();
+              var rowLastName = $(this).find('td:nth-child(3)').text().toLowerCase();
+              var rowThirdName = $(this).find('td:nth-child(4)').text().toLowerCase();
+              var rowProblem = $(this).find('td:nth-child(5)').text().toLowerCase();
+              var rowMoneyGoal = $(this).find('td:nth-child(6)').text().toLowerCase();
+
+              var match =
+                rowId.indexOf(filterId) > -1 &&
+                rowFirstName.indexOf(filterFirstName) > -1 &&
+                rowLastName.indexOf(filterLastName) > -1 &&
+                rowThirdName.indexOf(filterThirdName) > -1 &&
+                rowProblem.indexOf(filterProblem) > -1 &&
+                rowMoneyGoal.indexOf(filterMoneyGoal) > -1;
+
+              $(this).toggle(match);
+            });
+          });
+        });
+      </script>
     </div>
 
     <div id="updateForm" style="display: none;">
@@ -103,6 +190,74 @@
           </div>
 
           <button type="submit" class="btn-primary">Подтвердить</button>
+          <p id="status"></p>
+        </form>
+      </div>
+    </div>
+
+
+    <div id="volForm" style="display: none;">
+      <div class="card-body">
+        <h2 class="card-title">Стать волонтёром для:</h2>
+        <form>
+          <div class="form-group">
+            <label for="id">[ID]:</label>
+            <input type="text" id="id" name="id" class="form-control" readonly>
+          </div>
+
+          <div class="form-group">
+            <label for="firstName">[Имя]:</label>
+            <input type="text" id="firstName" name="firstName" class="form-control" readonly>
+          </div>
+
+          <div class="form-group">
+            <label for="secondName">[Фамилия]:</label>
+            <input type="text" id="secondName" name="secondName" class="form-control" readonly>
+          </div>
+
+          <div class="form-group">
+            <label for="thirdName">[Отчество]:</label>
+            <input type="text" id="thirdName" name="thirdName" class="form-control" readonly>
+          </div>
+
+          <p id="status"></p>
+        </form>
+      </div>
+
+
+      <div class="card-body">
+        <h2 class="card-title">Стать волонтёром</h2>
+        <form id=submit_vol>
+          <p>Нажимая кнопку подтвердить, вы принимаете соглашение об обработке персональных данных, согласно
+            которому
+            в фонд будут переданы ваши контактные данные, указанные для регистрации. Для дальнейшей связи по поводу
+            волонтёрства. Ещё раз проверьте правильность данных (адрес фонда) и конкретного участника, для которого вы
+            собираетесь стать волонтёром.</p>
+
+          <button type="submit" class="btn-primary">Подтвердить</button>
+          <p id="status"></p>
+        </form>
+      </div>
+
+      <div class="card-body">
+        <h2 class="card-title">Данные филиала:</h2>
+        <form id="filial_info">
+
+          <div class="form-group">
+            <label for="filialId" style="white-space: nowrap;">[ID Филиала]:</label>
+            <input type="text" id="filialId" name="filialId" class="form-control" readonly>
+          </div>
+
+          <div class="form-group">
+            <label for="adress" style="white-space: nowrap;">[Адрес филиала]:</label>
+            <input type="text" id="adress" name="adress" class="form-control" readonly style="width: 100%;">
+          </div>
+
+          <div class="form-group">
+            <label for="filial_phone" style="white-space: nowrap;">[Контактный номер филиала]:</label>
+            <input type="text" id="filial_phone" name="filial_phone" class="form-control" readonly>
+          </div>
+
           <p id="status"></p>
         </form>
       </div>
