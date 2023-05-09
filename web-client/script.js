@@ -62,6 +62,7 @@ $(document).ready(() => {
   });
 
   $("#sign-in").click(() => {
+    console.log("clicked");
     const username = $("#username").val();
     const password = $("#password").val();
 
@@ -74,7 +75,7 @@ $(document).ready(() => {
       "http://localhost:8000/sign_in",
       JSON.stringify(new_user),
       (data) => {
-        console.log(data);
+        console.log(data.response);
         if (data.response == true) {
           document.cookie = `username=${username}`;
 

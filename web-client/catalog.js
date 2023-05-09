@@ -94,7 +94,7 @@ const balanceCookie = cookies.find(cookie => cookie.trim().startsWith('balance='
 const balance = balanceCookie ? balanceCookie.split('=')[1] : null;
 
 if (username == 'admin') {
-  $(".nav-adm").text("Панель администратора");
+  $(".adm-panel").text("Админ панель");
 }
 $(".nav-username").text(`Пользователь: ${username}`);
 

@@ -117,7 +117,6 @@ int main() {
     beast::error_code ec;
     socket.shutdown(tcp::socket::shutdown_send, ec);
     if (ec == beast::errc::not_connected) {
-      // Ignore the error if the socket was already closed
       ec = {};
     }
     if (ec) {

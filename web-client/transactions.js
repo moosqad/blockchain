@@ -1,4 +1,5 @@
 $(document).ready(() => {
+
   const cookies = document.cookie.split(';');
   const usernameCookie = cookies.find(cookie => cookie.trim().startsWith('username='));
   const username = usernameCookie ? usernameCookie.split('=')[1] : null;
@@ -7,6 +8,24 @@ $(document).ready(() => {
   expirationTime.setDate(expirationTime.getDate() + 1);
   document.cookie = `expires=${expirationTime.toUTCString()};`;
 
+  function filterTable(searchQuery) {
+    const rows = document.querySelectorAll("#blockchain-table tbody tr");
+    rows.forEach(row => {
+      const transactionCell = row.querySelector("td:nth-child(5)");
+      const transactionText = transactionCell.textContent.toLowerCase();
+      if (transactionText.toLowerCase().includes(searchQuery.toLowerCase())) {
+        row.style.display = "";
+      } else {
+        row.style.display = "none";
+      }
+    });
+  }
+
+  const searchInput = document.getElementById("search-input");
+  searchInput.addEventListener("input", event => {
+    const searchQuery = event.target.value;
+    filterTable(searchQuery);
+  });
 
   function printBlockchain(blockchain) {
     const table = document.getElementById("blockchain-table");
@@ -24,6 +43,7 @@ $(document).ready(() => {
     });
     thead.appendChild(headerRow);
     table.appendChild(thead);
+
 
     // Create the table body
     const tbody = document.createElement("tbody");
@@ -57,6 +77,8 @@ $(document).ready(() => {
         const transactionRow = document.createElement("tr");
         if (index < block.transactions.length - 1) {
           transactionRow.classList.add("separator-bottom");
+        } else {
+          transactionRow.classList.add("separator-bottom"); // Add the class to the last row of transactions as well
         }
 
         const senderCell = document.createElement("td");

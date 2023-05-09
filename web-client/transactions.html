@@ -7,17 +7,77 @@
   <title>Blockchain Client</title>
   <link rel="stylesheet" href="style.css" />
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+
 </head>
 
 <body>
+  <header>
+    <nav class="navbar navbar-expand-lg">
+      <a class="navbar-brand" href="#">
+        <img src="logo.png" alt="Logo" width="50%" height="50%">
+      </a>
 
+      <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <ul class="navbar-nav mr-auto">
+          <li class="nav-item">
+            <a class="nav-link-active" href="transactions.html">Блокчейн</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link nav-link" href="catalog.html">Нужна помощь</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="fund.html">О фонде</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link nav-adm" href="#"></a>
+          </li>
+        </ul>
+        <ul class="navbar-nav ml-auto">
+          <li class="nav-item">
+            <div class="username-box">
+              <span class="nav-balance navbar-text">Войдите</span>
+            </div>
+          </li>
+          <li class="nav-item">
+            <div class="username-box">
+              <span class="nav-username navbar-text mr-3">Имя пользователя</span>
+            </div>
+            <ul class="dropdown-menu">
+              <li><a href="#" onclick="clearCookies();">Выйти</a></li>
+              <li><a href="signin.html">Войти в другой аккаунт</a></li>
+              <li><a href="admin_panel.html" class="adm-panel"></a></li>
+            </ul>
+          </li>
+        </ul>
+      </div>
+      <script>
+        $(document).ready(function () {
+          $('.dropdown-toggle').dropdown();
+        });
+      </script>
+    </nav>
+  </header>
+  <hr>
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
   <script src="transactions.js"></script>
+  <script src="user.js"></script>
+
   <div id="validity">
-    <p id="blockchain-data"></p>
+    <p id="blockchain-data" class="blockchain-info"></p>
   </div>
-  <table id="blockchain-table"></table>
-  <p id="user_balance">0</p>
+
+  <div id="search-container">
+    <label for="transaction-search">Поиск по переводам:</label>
+    <input type="text" id="search-input" placeholder="Введите информацию">
+  </div>
+
+
+  <div class="table-container">
+    <table id="blockchain-table">
+    </table>
+  </div>
+
+
 
 </body>
 

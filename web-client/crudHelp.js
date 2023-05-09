@@ -27,6 +27,7 @@ function addRow(id, firstName, secondName, thirdName, problem, moneyGoal, filial
   // Add an 'UPDATE' button to the row
   const updateButton = document.createElement('button');
   updateButton.textContent = 'Отредактровать';
+  updateButton.classList.add('update-button');
   updateButton.addEventListener('click', (event) => {
     // event.preventDefault(); // Prevent the form from being submitted
     console.log('Update button clicked');
@@ -48,6 +49,7 @@ function addRow(id, firstName, secondName, thirdName, problem, moneyGoal, filial
   // Add a 'DELETE' button to the row
   const deleteButton = document.createElement('button');
   deleteButton.textContent = 'Удалить';
+  deleteButton.classList.add('delete-button');
   deleteButton.addEventListener('click', (event) => {
     event.stopPropagation(); // Prevent the update button from being clicked
     console.log('Delete button clicked');

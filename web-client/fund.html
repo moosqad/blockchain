@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>О нас</title>
+  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+  <style>
+    .navbar-brand img {
+      max-width: 100%;
+      height: auto;
+    }
+
+    .container {
+      margin-top: 40px;
+    }
+
+    h1 {
+      font-size: 32px;
+      font-weight: bold;
+      margin-bottom: 20px;
+    }
+
+    h2 {
+      font-size: 24px;
+      font-weight: bold;
+      margin-top: 30px;
+      margin-bottom: 10px;
+    }
+
+    p {
+      font-size: 18px;
+      line-height: 1.5;
+      margin-bottom: 20px;
+    }
+
+    ul {
+      margin-bottom: 20px;
+    }
+
+    .text-center {
+      margin-top: 30px;
+    }
+  </style>
+</head>
+
+<body>
+  <header>
+    <nav class="navbar navbar-expand-lg">
+      <a class="navbar-brand" href="#">
+        <img src="logo.png" alt="Logo" width="50%" height="50%">
+      </a>
+
+      <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <ul class="navbar-nav mr-auto">
+          <li class="nav-item">
+            <a class="nav-link" href="transactions.html">Блокчейн</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link nav-link" href="catalog.html">Нужна помощь</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link-active" href="fund.html">О фонде</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link nav-adm" href="#"></a>
+          </li>
+        </ul>
+        <ul class="navbar-nav ml-auto">
+          <li class="nav-item">
+            <div class="username-box">
+              <span class="nav-balance navbar-text">Войдите</span>
+            </div>
+          </li>
+          <li class="nav-item">
+            <div class="username-box">
+              <span class="nav-username navbar-text mr-3">Имя пользователя</span>
+            </div>
+            <ul class="dropdown-menu">
+              <li><a href="#" onclick="clearCookies();">Выйти</a></li>
+              <li><a href="#">Войти в другой аккаунт</a></li>
+              <li><a href="#" class="adm-panel"></a></li>
+            </ul>
+          </li>
+        </ul>
+      </div>
+      <script>
+        $(document).ready(function () {
+          $('.dropdown-toggle').dropdown();
+        });
+      </script>
+    </nav>
+  </header>
+  <hr>
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="transactions.js"></script>
+  <script src="user.js"></script>
+
+  <div class="container">
+    <div class="row">
+      <div class="col-md-8 offset-md-2">
+        <h1>Благотворительный фонд на блокчейне</h1>
+        <p>"ДелайДобро.РФ" - благотворительный фонд, основанный на блокчейне. Мы используем мощь технологии
+          блокчейн для облегчения прозрачных и эффективных благотворительных транзакций.</p>
+
+        <h2>Наша миссия</h2>
+        <p>Наша миссия состоит в том, чтобы оказывать положительное влияние на мир, предоставляя безопасную и прозрачную
+          платформу для благотворительных пожертвований. Благодаря использованию технологии блокчейн мы гарантируем, что
+          каждое пожертвование отслеживается и подотчетно.
+        </p>
+
+        <h2>Как это работает</h2>
+        <p>Наша система, основанная на блокчейне, позволяет донорам безопасно вносить средства и отслеживать свои
+          пожертвования в режиме реального времени. Каждое пожертвование регистрируется как транзакция в блокчейне,
+          обеспечивая прозрачность и неизменность.
+        </p>
+
+        <h2>Плюсы технологии блокчейн</h2>
+        <ul>
+          <li>Прозрачность: Каждая транзакция записывается в блокчейн и может быть проверена кем угодно.</li>
+          <li>Безопасность: Технология блокчейн гарантирует, что пожертвования безопасны и защищены от
+            несанкционированного доступа.</li>
+          <li>Эффективность: Устраняя посредников, мы сокращаем административные расходы и гарантируем, что средства
+            быстрее дойдут до получателей.</li>
+          <li>Доверие: Децентрализованная природа блокчейна внушает доверие донорам, знающим, что их взносы используются
+            по назначению.
+          </li>
+        </ul>
+
+        <h2>Вовлекайтесь</h2>
+        <p>Мы верим, что у каждого есть сила изменить ситуацию к лучшему. Вы можете принять участие в работе нашего
+          благотворительного фонда, сделав пожертвование или пожертвовав своим временем и навыками волонтера. Вместе мы
+          сможем создать лучший мир.</p>
+
+        <div class="text-center">
+          <a href="catalog.html" class="btn btn-primary">Сделать пожертвование</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</body>
+
+</html>
