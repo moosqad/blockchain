@@ -1,12 +1,15 @@
 #include <openssl/sha.h>
 #include <sqlite3.h>
 
+#include <atomic>
 #include <ctime>
 #include <iomanip>
 #include <iostream>
+#include <mutex>
 #include <nlohmann/json.hpp>
 #include <sstream>
 #include <string>
+#include <thread>
 #include <vector>
 
 using namespace std;
@@ -84,16 +87,76 @@ struct Block {
     }
     return sha256(ss.str());
   }
-
-  // функция майнинга блока
-  void mineBlock(int difficulty) {
-    while (hash.substr(0, difficulty) != string(difficulty, '0')) {
-      nonce++;
-      hash = calculate_hash();
+  string calculateHashWithNonce(int nonce) const {
+    stringstream ss;
+    ss << index << timestamp << previousHash << nonce;
+    for (const Transaction& tx : transactions) {
+      ss << tx.sender << tx.receiver << tx.amount;
     }
+    string data = ss.str();
+
+    unsigned char hash[SHA256_DIGEST_LENGTH];
+    SHA256_CTX sha256;
+    SHA256_Init(&sha256);
+    SHA256_Update(&sha256, data.c_str(), data.size());
+    SHA256_Final(hash, &sha256);
+
+    stringstream result;
+    for (int i = 0; i < SHA256_DIGEST_LENGTH; i++) {
+      result << hex << setw(2) << setfill('0') << (int)hash[i];
+    }
+
+    return result.str();
+  }
+
+  void mineBlock(int difficulty, int numThreads) {
+    atomic<bool> blockMined(false);
+    mutex blockMutex;
+
+    vector<thread> threads;
+
+    for (int i = 0; i < numThreads; i++) {
+      threads.emplace_back([difficulty, this, &blockMined, &blockMutex]() {
+        int localNonce = 0;
+        string localHash;
+
+        while (!blockMined) {
+          localHash = calculateHashWithNonce(localNonce);
+
+          // Check if the block is mined by comparing the prefix of the hash
+          // with the desired difficulty
+          if (localHash.substr(0, difficulty) == string(difficulty, '0')) {
+            {
+              lock_guard<mutex> lock(blockMutex);
+              if (!blockMined) {
+                blockMined = true;
+                nonce = localNonce;
+                hash = localHash;
+              }
+            }
+            break;
+          }
+
+          localNonce++;
+        }
+      });
+    }
+
+    for (auto& thread : threads) {
+      thread.join();
+    }
+
     cout << "Block mined: " << hash << endl;
   }
 
+  // void mineBlock(int difficulty, int numThreads) {
+  //   cout << numThreads;
+  //   while (hash.substr(0, difficulty) != string(difficulty, '0')) {
+  //     nonce++;
+  //     hash = calculate_hash();
+  //   }
+  //   cout << "Block mined: " << hash << endl;
+  // }
   // Добавление транзакции в блокчейн, хранящийся в оперативной памяти
   void addTransaction(Transaction tx) { transactions.push_back(tx); }
   string toString() const {
@@ -181,7 +244,7 @@ class Blockchain {
   // функция добавляющая блок в цепочку блокчейна
   void addBlock(Block newBlock) {
     newBlock.previousHash = getLastBlock().hash;
-    newBlock.mineBlock(difficulty);
+    newBlock.mineBlock(difficulty, 2);
     chain.push_back(newBlock);
 
     string sql =
